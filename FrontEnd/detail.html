@@ -1,0 +1,613 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="XUNSHE 产品详情">
+  <title>产品详情 — XUNSHE 迅蛇</title>
+  <link rel="icon" type="image/png" href="/logo/RED_LOGO.png">
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    /* ── 详情页布局 ── */
+    .detail-page {
+      padding: 100px 24px 80px;
+    }
+
+    .detail-container {
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+
+    .breadcrumb {
+      margin-bottom: 32px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .breadcrumb a {
+      color: var(--text-secondary);
+    }
+
+    .breadcrumb a:hover {
+      color: var(--red-primary);
+    }
+
+    .breadcrumb span {
+      margin: 0 8px;
+    }
+
+    .detail-main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 60px;
+    }
+
+    /* ── 主图区域 ── */
+    .detail-gallery {
+      position: sticky;
+      top: calc(var(--nav-height) + 24px);
+      align-self: start;
+    }
+
+    .main-image {
+      aspect-ratio: 1 / 1;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 32px;
+    }
+
+    .main-image .img-placeholder {
+      font-size: 6rem;
+      opacity: 0.12;
+    }
+
+    .gallery-thumbs {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .gallery-thumbs .thumb {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gallery-thumbs .thumb.active {
+      border-color: var(--red-primary);
+      box-shadow: 0 0 12px var(--red-glow);
+    }
+
+    .gallery-thumbs .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ── 产品信息 ── */
+    .detail-info {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .detail-info .product-category {
+      display: inline-block;
+      padding: 5px 14px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--red-primary);
+      background: rgba(255,0,21,0.1);
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    .detail-info .product-name {
+      font-family: var(--font-en);
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      line-height: 1.2;
+    }
+
+    .detail-info .product-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .detail-info .product-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      padding: 20px;
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-card);
+    }
+
+    /* ── 购买按钮组 ── */
+    .buy-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .buy-btn {
+      flex: 1;
+      min-width: 120px;
+      padding: 14px 24px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-align: center;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #1a1a26;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .buy-btn:hover {
+      border-color: var(--red-primary);
+      box-shadow: 0 4px 20px var(--red-glow);
+      transform: translateY(-2px);
+      color: #fff;
+    }
+
+    .buy-btn.primary-buy {
+      background: var(--red-primary);
+      color: #fff;
+    }
+
+    .buy-btn.primary-buy:hover {
+      background: #ff2222;
+      box-shadow: 0 4px 20px var(--red-glow);
+      transform: translateY(-2px);
+      color: #fff;
+    }
+
+    /* ── 平台专属按钮色 ── */
+    .buy-btn.platform-taobao {
+      background: #ff5000;
+      border-color: #ff5000;
+    }
+    .buy-btn.platform-taobao:hover {
+      background: #ff6e22;
+      box-shadow: 0 4px 20px rgba(255,80,0,0.4);
+      border-color: #ff6e22;
+    }
+
+    .buy-btn.platform-jd {
+      background: #c91623;
+      border-color: #c91623;
+    }
+    .buy-btn.platform-jd:hover {
+      background: #e01f2b;
+      box-shadow: 0 4px 20px rgba(201,22,35,0.4);
+      border-color: #e01f2b;
+    }
+
+    .buy-btn.platform-pdd {
+      background: #e02e24;
+      border-color: #e02e24;
+    }
+    .buy-btn.platform-pdd:hover {
+      background: #f04a3e;
+      box-shadow: 0 4px 20px rgba(224,46,36,0.4);
+      border-color: #f04a3e;
+    }
+
+    .buy-btn.platform-douyin {
+      background: #fe2c55;
+      border-color: #fe2c55;
+    }
+    .buy-btn.platform-douyin:hover {
+      background: #ff4d6a;
+      box-shadow: 0 4px 20px rgba(254,44,85,0.4);
+      border-color: #ff4d6a;
+    }
+
+    /* ── 颜色选择器 ── */
+    .color-options {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .color-options-label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .color-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all var(--transition-fast);
+      background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .color-swatch img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .color-swatch:hover {
+      border-color: rgba(255,0,21,0.5);
+      transform: scale(1.1);
+    }
+
+    .color-swatch.active {
+      border-color: var(--red-primary);
+      box-shadow: 0 0 14px var(--red-glow);
+    }
+
+    .color-name-tag {
+      font-size: 0.82rem;
+      color: var(--text-primary);
+      font-weight: 500;
+      margin-left: 2px;
+    }
+
+    /* ── 规格表格 ── */
+    .specs-section {
+      margin-top: 48px;
+    }
+
+    .specs-title {
+      font-family: var(--font-en);
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--red-primary);
+      display: inline-block;
+    }
+
+    .specs-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .specs-table tr {
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .specs-table td {
+      padding: 14px 16px;
+      font-size: 0.92rem;
+    }
+
+    .specs-table td:first-child {
+      color: var(--text-muted);
+      width: 30%;
+      font-weight: 500;
+    }
+
+    .specs-table td:last-child {
+      color: var(--text-primary);
+    }
+
+    /* ── 产品特点 ── */
+    .features-section {
+      margin-top: 48px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .feature-item {
+      padding: 16px 20px;
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-card);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feature-item .feat-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--red-primary);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── 错误状态 ── */
+    .error-state {
+      text-align: center;
+      padding: 100px 24px;
+    }
+
+    .error-state .error-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    /* ── 响应式 ── */
+    @media (max-width: 768px) {
+      .detail-page { padding: 80px 16px 60px; }
+      .detail-main { grid-template-columns: 1fr; gap: 32px; }
+      .detail-gallery { position: static; }
+      .detail-info .product-name { font-size: 1.8rem; }
+      .buy-actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ 顶部导航 ═══ -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+          <img src="/logo/xunshe_top.png" class="brand-icon" style="width:168px;height:42px;border-radius:6px;" alt="XUNSHE">
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" data-i18n="nav.home"><img src="/ICON/主页.svg" class="icon-svg icon-svg-sm" alt=""> 首页</a></li>
+        <li><a href="products.html" data-i18n="nav.products"><img src="/ICON/产品中心.svg" class="icon-svg icon-svg-sm" alt=""> 产品中心</a></li>
+        <li><a href="drivers.html" data-i18n="nav.drivers"><img src="/ICON/驱动支持.svg" class="icon-svg icon-svg-sm" alt=""> 驱动下载</a></li>
+      </ul>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="lang-switch">
+          <button data-lang="zh-CN" class="active">简</button>
+          <button data-lang="zh-TC">繁</button>
+          <button data-lang="en">EN</button>
+        </div>
+        <button class="nav-toggle" aria-label="菜单">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-container">
+    <!-- ═══ 详情内容 ═══ -->
+    <section class="detail-page">
+      <div class="detail-container">
+        <!-- 面包屑 -->
+        <div class="breadcrumb">
+          <a href="index.html">首页</a><span>/</span>
+          <a href="products.html" data-i18n="nav.products">产品中心</a><span>/</span>
+          <span id="breadcrumbCat"></span><span>/</span>
+          <span id="breadcrumbName" style="color:var(--text-primary);"></span>
+        </div>
+
+        <!-- 主内容: 图 + 信息 -->
+        <div class="detail-main" id="detailMain">
+          <!-- JS 动态渲染 -->
+        </div>
+
+        <!-- 技术规格 -->
+        <div class="specs-section" id="specsSection" style="display:none;">
+          <h3 class="specs-title" data-i18n="detail.specs">技术规格</h3>
+          <table class="specs-table" id="specsTable"></table>
+        </div>
+
+        <!-- 产品特点 -->
+        <div class="features-section" id="featuresSection" style="display:none;">
+          <h3 class="specs-title" data-i18n="detail.features">产品特点</h3>
+          <div class="features-grid" id="featuresGrid"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══ 页脚 ═══ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand"><span class="brand-red">XUNSHE</span> 迅蛇</div>
+        <p class="footer-desc">专业电竞外设品牌。以蛇之迅捷，铸胜利之器。</p>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.products">产品</h4>
+        <a href="products.html?category=keyboard">电竞键盘</a>
+        <a href="products.html?category=mouse">电竞鼠标</a>
+        <a href="products.html">全部产品</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.support">支持</h4>
+        <a href="drivers.html">驱动下载</a>
+        <a href="#">使用手册</a>
+        <a href="#">售后服务</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.company">公司</h4>
+        <a href="#">关于我们</a>
+        <a href="#">联系我们</a>
+        <a href="#">加入我们</a>
+      </div>
+    </div>
+    <div class="footer-inner footer-bottom">
+      <span data-i18n="footer.rights">© 2026 XUNSHE. All rights reserved.</span>
+      <span data-i18n="footer.icp">浙ICP备XXXXXXXX号</span>
+    </div>
+  </footer>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    // ── 详情页逻辑（新数据模型：仅从 Product 获取基本信息） ──
+    let productData = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const params = new URLSearchParams(window.location.search);
+      const productId = params.get('id');
+      if (!productId) {
+        showError('缺少产品ID参数');
+        return;
+      }
+      await loadProductDetail(productId);
+    });
+
+    async function loadProductDetail(productId) {
+      const main = document.getElementById('detailMain');
+      main.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;"><div class="loading-spinner" style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.1);border-top-color:var(--red-primary);border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;"></div></div>';
+
+      try {
+        // 同时获取产品目录和产品白底图数据
+        const [prodRes, imgRes] = await Promise.all([
+          API.get('/content/products', { productId, limit: 1 }),
+          API.get('/content/product-images', { productId, limit: 1 })
+        ]);
+
+        productData = prodRes.data?.items?.[0];
+        const imageData = imgRes.data?.items?.[0];
+
+        if (!productData) {
+          showError('产品未找到');
+          return;
+        }
+
+        renderDetail(imageData);
+      } catch (e) {
+        console.error('加载产品详情失败:', e);
+        showError('加载失败');
+      }
+    }
+
+    function renderDetail(imageData) {
+      const main = document.getElementById('detailMain');
+      const catIcon = productData.category === 'keyboard' ? '键盘' : (productData.category === 'mouse' ? '鼠标' : '耳机');
+      const catLabel = productData.category === 'keyboard' ? '电竞键盘' : (productData.category === 'mouse' ? '电竞鼠标' : '电竞耳机');
+
+      document.getElementById('breadcrumbCat').textContent = catLabel;
+      document.getElementById('breadcrumbName').textContent = productData.name || productData.productId;
+
+      // 主图
+      const mainImage = imageData?.image || '';
+      const mainImageHTML = mainImage
+        ? `<img src="${mainImage}" alt="${productData.name}" id="mainImg">`
+        : `<span class="img-placeholder"><img src="/ICON/${catIcon}.svg" class="icon-svg icon-svg-xl" alt="" style="opacity:0.12;width:6rem;height:6rem;"></span>`;
+
+      // 颜色变体
+      const colors = imageData?.colors || [];
+      const hasColors = Array.isArray(colors) && colors.length > 0;
+      const colorSelectorHTML = hasColors ? `
+        <div class="color-options">
+          <span class="color-options-label">颜色：</span>
+          ${colors.map((c, i) => `
+            <div class="color-swatch ${i === 0 ? 'active' : ''}" onclick="switchColor('${escapeAttr(c.image || '')}', '${escapeAttr(c.name)}', this)" title="${escapeAttr(c.name)}">
+              ${c.image ? `<img src="${c.image}" alt="${c.name}">` : `<span style="font-size:0.7rem;color:var(--text-muted);">${(c.name || '?').charAt(0)}</span>`}
+            </div>
+          `).join('')}
+          <span class="color-name-tag" id="colorNameTag">${colors[0]?.name || ''}</span>
+        </div>
+      ` : '';
+
+      // 购买链接
+      const buyLinks = imageData?.buyLinks || [];
+      const buyLinksHTML = buyLinks.length > 0
+        ? buyLinks.map((link, i) => {
+            const platformClass = getPlatformClass(link.platform);
+            return `<a href="${escapeAttr(link.url || '#')}" target="_blank" rel="noopener" class="buy-btn ${platformClass}">${escapeAttr(link.label || link.platform || '购买')}</a>`;
+          }).join('')
+        : '<p style="color:var(--text-muted);">即将开售，敬请期待</p>';
+
+      main.innerHTML = `
+        <div class="detail-gallery">
+          <div class="main-image" id="mainImage">
+            ${mainImageHTML}
+          </div>
+        </div>
+        <div class="detail-info">
+          <span class="product-category"><img src="/ICON/${catIcon}.svg" class="icon-svg icon-svg-sm icon-red" alt=""> ${catLabel}</span>
+          <h1 class="product-name">${productData.name}</h1>
+          <p class="product-subtitle">型号: ${productData.productId}</p>
+
+          ${colorSelectorHTML}
+
+          <div class="buy-actions">
+            ${buyLinksHTML}
+          </div>
+        </div>
+      `;
+
+      const specsSection = document.getElementById('specsSection');
+      const featuresSection = document.getElementById('featuresSection');
+      if (specsSection) specsSection.style.display = 'none';
+      if (featuresSection) featuresSection.style.display = 'none';
+
+      if (window.I18N) I18N.updatePage();
+    }
+
+    function switchColor(imageUrl, colorName, el) {
+      if (imageUrl) {
+        const mainImg = document.getElementById('mainImg');
+        if (mainImg) mainImg.src = imageUrl;
+      }
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+      if (el) el.classList.add('active');
+      const nameTag = document.getElementById('colorNameTag');
+      if (nameTag) nameTag.textContent = colorName || '';
+    }
+
+    function escapeAttr(str) {
+      return String(str || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // ── 根据平台名返回对应的 CSS 类 ──
+    function getPlatformClass(platform) {
+      const p = (platform || '').toLowerCase();
+      if (p.includes('淘宝') || p.includes('taobao')) return 'platform-taobao';
+      if (p.includes('京东') || p.includes('jd')) return 'platform-jd';
+      if (p.includes('拼多多') || p.includes('pdd') || p.includes('pinduoduo')) return 'platform-pdd';
+      if (p.includes('抖音') || p.includes('douyin') || p.includes('tiktok')) return 'platform-douyin';
+      return '';
+    }
+
+    function showError(msg) {
+      document.getElementById('detailMain').innerHTML = `
+        <div class="error-state" style="grid-column:1/-1;">
+          <div class="error-icon"><img src="/ICON/暂无数据.svg" class="icon-svg icon-svg-xl" alt=""></div>
+          <h2>${msg}</h2>
+          <p class="mt-2"><a href="products.html" class="btn btn-outline btn-sm" data-i18n="detail.back">返回列表</a></p>
+        </div>
+      `;
+      if (window.I18N) I18N.updatePage();
+    }
+  </script>
+</body>
+</html>

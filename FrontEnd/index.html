@@ -1,0 +1,836 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="XUNSHE（迅蛇）— 专业电竞外设品牌，极致性能，为胜利而生">
+  <title>XUNSHE 迅蛇官网</title>
+  <link rel="icon" type="image/png" href="/logo/RED_LOGO.png">
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    /* ═══ 首页专属样式 ═══ */
+
+    /* ── 全屏主视觉 ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 35%, #1a1025 0%, #0a0a0f 70%);
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: url('XUNSHE_background.png') center/cover no-repeat;
+    }
+
+    .hero-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 25% 40%, rgba(255,0,21,0.12) 0%, transparent 50%),
+        radial-gradient(circle at 75% 60%, rgba(255,0,21,0.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 80%, rgba(255,0,21,0.15) 0%, transparent 40%);
+    }
+
+    /* 网格线装饰 */
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 0 24px;
+      max-width: 800px;
+    }
+
+    .hero-logo {
+      margin: 0 auto 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-logo img {
+      width: 220px;
+      height: auto;
+    }
+
+    .hero h1 {
+      font-family: var(--font-en);
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      letter-spacing: 4px;
+      margin-bottom: 16px;
+      background: linear-gradient(180deg, #fff 0%, #ccc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero h1 .brand {
+      background: linear-gradient(135deg, #ff2437, #ff2222);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      line-height: 1.8;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* 向下滚动指示 */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      animation: fadeInUp 0.7s ease 1.2s forwards;
+      opacity: 0;
+    }
+
+    .scroll-indicator .mouse {
+      width: 26px;
+      height: 40px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 13px;
+      position: relative;
+    }
+
+    .scroll-indicator .mouse::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 8px;
+      background: var(--red-primary);
+      border-radius: 2px;
+      animation: scrollWheel 1.6s ease-in-out infinite;
+    }
+
+    @keyframes scrollWheel {
+      0%, 100% { top: 8px; opacity: 1; }
+      50% { top: 20px; opacity: 0.3; }
+    }
+
+    /* ── 产品轮播 ── */
+    .carousel-section {
+      padding: 80px 24px;
+    }
+
+    .carousel-wrapper {
+      max-width: calc(var(--max-width) + 72px);
+      margin: 0 auto;
+      position: relative;
+      padding: 0 44px;
+    }
+
+    .carousel {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .carousel-slide {
+      min-width: 100%;
+      position: relative;
+      aspect-ratio: 2 / 1;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+    }
+
+    .carousel-slide .slide-bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      filter: none !important;
+    }
+
+    .carousel-slide .slide-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(90deg, rgba(10,10,15,0.45) 0%, rgba(10,10,15,0.2) 50%, rgba(10,10,15,0.05) 100%);
+    }
+
+    .carousel-slide .slide-content {
+      position: relative;
+      z-index: 2;
+      width: 50%;
+      height: 100%;
+      padding: 48px 0 48px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      margin: 0;
+    }
+
+    .carousel-slide .slide-title {
+      font-family: var(--font-en);
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--text-primary);
+    }
+
+    .carousel-slide .slide-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.25rem;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .carousel-slide .slide-cta {
+      align-self: flex-start;
+    }
+
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .carousel-dots button {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transition: all var(--transition-fast);
+    }
+
+    .carousel-dots button.active {
+      background: var(--red-primary);
+      box-shadow: 0 0 10px var(--red-glow);
+      width: 28px;
+      border-radius: 5px;
+    }
+
+    .carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(10,10,15,0.85);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .carousel-arrow:hover {
+      background: var(--red-primary);
+      border-color: var(--red-primary);
+    }
+
+    .carousel-arrow.prev { left: 0; }
+    .carousel-arrow.next { right: 0; }
+
+    /* ── 产品速览网格 ── */
+    .products-preview {
+      padding: 80px 24px;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: all var(--transition-smooth);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .product-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      box-shadow: 0 0 30px var(--red-glow), inset 0 0 30px var(--red-dim);
+      transition: opacity var(--transition-smooth);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .product-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(255,0,21,0.4);
+    }
+
+    .product-card:hover::before { opacity: 1; }
+
+    /* ── 首页产品横向滚动 ── */
+    .products-scroll-wrap {
+      position: relative;
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+
+    .products-scroll {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding-bottom: 8px;
+    }
+
+    .products-scroll::-webkit-scrollbar { display: none; }
+
+    .products-scroll .product-card {
+      flex: 0 0 320px;
+      min-width: 320px;
+    }
+
+    .scroll-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(10,10,15,0.85);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .scroll-arrow:hover {
+      background: var(--red-primary);
+      border-color: var(--red-primary);
+    }
+
+    .scroll-arrow.prev { left: -48px; }
+    .scroll-arrow.next { right: -48px; }
+
+    /* 首页产品卡片 4:3 图片比例 */
+    .product-card .card-img-43 {
+      aspect-ratio: 4 / 3;
+      background: var(--bg-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .product-card .card-img-43 img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .card-img-43 img {
+      transform: scale(1.06);
+    }
+
+    .product-card .card-img {
+      aspect-ratio: 1 / 1;
+      background: var(--bg-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .product-card .card-img .placeholder {
+      font-size: 4rem;
+      opacity: 0.15;
+    }
+
+    .product-card .card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .card-img img {
+      transform: scale(1.06);
+    }
+
+    .product-card .card-info {
+      padding: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .product-card .card-category {
+      display: inline-block;
+      padding: 3px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--red-primary);
+      background: rgba(255,0,21,0.1);
+      border-radius: 3px;
+      margin-bottom: 8px;
+    }
+
+    .product-card .card-name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+    }
+
+    .product-card .card-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* ── 品牌故事 ── */
+    .brand-story {
+      padding: 80px 24px;
+    }
+
+    .story-content {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .story-text {
+      font-size: 1.08rem;
+      line-height: 2;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .story-mission {
+      display: inline-block;
+      padding: 12px 32px;
+      border: 1px solid rgba(255,0,21,0.3);
+      border-radius: 50px;
+      font-family: var(--font-en);
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: var(--red-primary);
+      background: rgba(255,0,21,0.05);
+    }
+
+    /* ── 分类标题行 ── */
+    .category-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+
+    .category-header h2 {
+      font-family: var(--font-en);
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .category-header h2 .icon {
+      color: var(--red-primary);
+      margin-right: 10px;
+    }
+
+    /* ── 空状态 ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    /* ── 响应式 ── */
+    @media (max-width: 768px) {
+      .carousel-slide {
+        aspect-ratio: auto;
+        min-height: 320px;
+      }
+      .carousel-slide .slide-overlay {
+        background: linear-gradient(180deg, rgba(10,10,15,0.4) 0%, rgba(10,10,15,0.2) 50%, rgba(10,10,15,0.5) 100%);
+      }
+      .carousel-slide .slide-content {
+        width: 100%;
+        padding: 32px 24px 16px;
+        text-align: center;
+        justify-content: flex-end;
+        align-items: center;
+      }
+      .carousel-slide .slide-title { font-size: 1.4rem; }
+      .carousel-slide .slide-cta { align-self: center; }
+      .carousel-arrow { width: 36px; height: 36px; font-size: 1rem; }
+      .carousel-wrapper { padding: 0 36px; }
+      .carousel-arrow.prev { left: 0; }
+      .carousel-arrow.next { right: 0; }
+      .hero-logo img { width: 160px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ 顶部导航 ═══ -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <img src="/logo/xunshe_top.png" class="brand-icon" style="width:168px;height:42px;border-radius:6px;" alt="XUNSHE">
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" data-i18n="nav.home"><img src="/ICON/主页.svg" class="icon-svg icon-svg-sm" alt=""> 首页</a></li>
+        <li><a href="products.html" data-i18n="nav.products"><img src="/ICON/产品中心.svg" class="icon-svg icon-svg-sm" alt=""> 产品中心</a></li>
+        <li><a href="drivers.html" data-i18n="nav.drivers"><img src="/ICON/驱动支持.svg" class="icon-svg icon-svg-sm" alt=""> 驱动下载</a></li>
+      </ul>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="lang-switch">
+          <button data-lang="zh-CN" class="active">简</button>
+          <button data-lang="zh-TC">繁</button>
+          <button data-lang="en">EN</button>
+        </div>
+        <button class="nav-toggle" aria-label="菜单">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ 全屏主视觉 ═══ -->
+  <section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-logo"><img src="/logo/XUNSHE-LOGO.png" alt="XUNSHE"></div>
+      <h1 data-animate>迅蛇<span class="brand"> XUNSHE</span></h1>
+      <p data-animate data-i18n="home.hero.subtitle">专业电竞外设品牌，以极致性能点燃每一场战斗</p>
+      <div class="hero-cta" data-animate>
+        <a href="products.html" class="btn btn-primary btn-lg" data-i18n="home.hero.cta"><img src="/ICON/探索.svg" class="icon-svg icon-svg-sm icon-white" alt=""> 探索产品</a>
+        <a href="drivers.html" class="btn btn-outline btn-lg"><img src="/ICON/驱动支持.svg" class="icon-svg icon-svg-sm" alt=""> 驱动下载</a>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <div class="mouse"></div>
+      <span>SCROLL</span>
+    </div>
+  </section>
+
+  <!-- ═══ 产品轮播 ═══ -->
+  <section class="carousel-section" data-animate>
+    <div class="section-inner">
+      <h2 class="section-title"><img src="/ICON/热销.svg" class="icon-svg icon-svg-lg icon-red" alt=""> <span class="highlight">热销</span> 推荐</h2>
+      <p class="section-subtitle">众多玩家的共同选择</p>
+    </div>
+    <div class="carousel-wrapper">
+      <button class="carousel-arrow prev" id="carouselPrev">◀</button>
+      <button class="carousel-arrow next" id="carouselNext">▶</button>
+      <div class="carousel" id="homeCarousel">
+        <div class="carousel-track" id="carouselTrack">
+          <!-- JS 动态加载 -->
+        </div>
+      </div>
+    </div>
+    <div class="carousel-dots" id="carouselDots"></div>
+  </section>
+
+  <!-- ═══ 键盘速览（横向滚动） ═══ -->
+  <section class="products-preview" id="keyboardSection">
+    <div class="section-inner">
+      <div class="category-header">
+        <h2><img src="/ICON/键盘.svg" class="icon-svg icon-svg-lg icon-red" alt="" style="margin-right:8px;"> <span data-i18n="home.keyboard.title">电竞键盘</span></h2>
+        <a href="products.html?category=keyboard" class="btn btn-ghost btn-sm" data-i18n="home.keyboard.viewAll">查看全部键盘 →</a>
+      </div>
+      <div class="products-scroll-wrap">
+        <button class="scroll-arrow prev" id="keyboardScrollPrev" aria-label="向左滚动">◀</button>
+        <div class="products-scroll" id="keyboardGrid">
+          <!-- JS 动态加载 -->
+        </div>
+        <button class="scroll-arrow next" id="keyboardScrollNext" aria-label="向右滚动">▶</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 鼠标速览（横向滚动） ═══ -->
+  <section class="products-preview" id="mouseSection">
+    <div class="section-inner">
+      <div class="category-header">
+        <h2><img src="/ICON/鼠标.svg" class="icon-svg icon-svg-lg icon-red" alt="" style="margin-right:8px;"> <span data-i18n="home.mouse.title">电竞鼠标</span></h2>
+        <a href="products.html?category=mouse" class="btn btn-ghost btn-sm" data-i18n="home.mouse.viewAll">查看全部鼠标 →</a>
+      </div>
+      <div class="products-scroll-wrap">
+        <button class="scroll-arrow prev" id="mouseScrollPrev" aria-label="向左滚动">◀</button>
+        <div class="products-scroll" id="mouseGrid">
+          <!-- JS 动态加载 -->
+        </div>
+        <button class="scroll-arrow next" id="mouseScrollNext" aria-label="向右滚动">▶</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 耳机速览（横向滚动） ═══ -->
+  <section class="products-preview" id="headphoneSection">
+    <div class="section-inner">
+      <div class="category-header">
+        <h2><img src="/ICON/耳机.svg" class="icon-svg icon-svg-lg icon-red" alt="" style="margin-right:8px;"> <span data-i18n="home.headphone.title">电竞耳机</span></h2>
+        <a href="products.html?category=headphone" class="btn btn-ghost btn-sm" data-i18n="home.headphone.viewAll">查看全部耳机 →</a>
+      </div>
+      <div class="products-scroll-wrap">
+        <button class="scroll-arrow prev" id="headphoneScrollPrev" aria-label="向左滚动">◀</button>
+        <div class="products-scroll" id="headphoneGrid">
+          <!-- JS 动态加载 -->
+        </div>
+        <button class="scroll-arrow next" id="headphoneScrollNext" aria-label="向右滚动">▶</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 品牌故事 ═══ -->
+  <section class="brand-story" data-animate>
+    <div class="section-inner">
+      <h2 class="section-title"><span class="highlight" data-i18n="home.story.title">品牌故事</span></h2>
+      <div class="story-content">
+        <p class="story-text" data-i18n="home.story.desc">XUNSHE（迅蛇）诞生于对电竞的极致热爱。我们相信，每一次精准的敲击、每一个毫秒级的响应，都可能决定胜负。从机械键盘到电竞鼠标，我们以蛇的迅捷与精准为灵感，打造专为胜利而生的电竞装备。</p>
+        <div class="story-mission" data-i18n="home.story.mission">极速 · 精准 · 为胜利而生</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 页脚 ═══ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand"><span class="brand-red">XUNSHE</span> 迅蛇</div>
+        <p class="footer-desc">专业电竞外设品牌。以蛇之迅捷，铸胜利之器。</p>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.products">产品</h4>
+        <a href="products.html?category=keyboard">电竞键盘</a>
+        <a href="products.html?category=mouse">电竞鼠标</a>
+        <a href="products.html">全部产品</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.support">支持</h4>
+        <a href="drivers.html">驱动下载</a>
+        <a href="#">使用手册</a>
+        <a href="#">售后服务</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.company">公司</h4>
+        <a href="#">关于我们</a>
+        <a href="#">联系我们</a>
+        <a href="#">加入我们</a>
+      </div>
+    </div>
+    <div class="footer-inner footer-bottom">
+      <span data-i18n="footer.rights">© 2026 XUNSHE. All rights reserved.</span>
+      <span data-i18n="footer.icp">浙ICP备XXXXXXXX号</span>
+    </div>
+  </footer>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    // ── 首页业务逻辑（性能优化版） ──
+    let carouselData = [];
+    let carouselIndex = 0;
+    let carouselTimer = null;
+    let productMap = {}; // 全局产品目录缓存
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      initCarouselControls();
+      initScrollButtons();
+
+      // ① 并行发起所有 API 请求，产品目录只请求一次
+      const [prodRes, carouselRes, showcaseRes] = await Promise.all([
+        API.get('/content/products', { limit: 200 }),
+        API.get('/content/home-carousel', { sort: 'sortOrder', limit: 6 }),
+        API.get('/content/home-showcase', { limit: 200, sort: 'sortOrder' })
+      ]);
+
+      // ② 构建全局产品映射
+      (prodRes.data?.items || []).forEach(p => { productMap[p.productId] = p; });
+
+      // ③ 渲染轮播
+      carouselData = carouselRes.data?.items || [];
+      carouselData = carouselData.map(item => ({
+        ...item,
+        productName: productMap[item.productId]?.name || item.productId || ''
+      }));
+      renderCarousel();
+      startAutoSlide();
+
+      // ④ 渲染展示区
+      const showcases = showcaseRes.data?.items || [];
+      renderShowcase('keyboard', showcases);
+      renderShowcase('mouse', showcases);
+      renderShowcase('headphone', showcases);
+    });
+
+    // ── 渲染轮播 ──
+    function renderCarousel() {
+      const track = document.getElementById('carouselTrack');
+      const dots = document.getElementById('carouselDots');
+
+      if (carouselData.length === 0) {
+        track.innerHTML = '<div class="carousel-slide"><div class="slide-bg"></div><div class="slide-content"><div class="slide-title">XUNSHE</div><div class="slide-subtitle">即将上线</div></div></div>';
+        dots.innerHTML = '';
+        return;
+      }
+
+      track.innerHTML = carouselData.map((item, i) => `
+        <div class="carousel-slide">
+          ${item.image ? `<img src="${item.image}" alt="${item.productName}" class="slide-bg-img" ${i === 0 ? '' : 'loading="lazy"'} decoding="async">` : ''}
+          <div class="slide-overlay"></div>
+          <div class="slide-content">
+            <div class="slide-title">${item.productName}</div>
+            <div class="slide-subtitle">${item.description || ''}</div>
+            <a href="detail.html?id=${item.productId}" class="btn btn-primary slide-cta">了解更多 →</a>
+          </div>
+        </div>
+      `).join('');
+
+      dots.innerHTML = carouselData.map((_, i) => `
+        <button class="${i === 0 ? 'active' : ''}" data-index="${i}"></button>
+      `).join('');
+
+      dots.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => goToSlide(parseInt(btn.dataset.index)));
+      });
+    }
+
+    function goToSlide(index) {
+      carouselIndex = index;
+      document.getElementById('carouselTrack').style.transform = `translateX(-${index * 100}%)`;
+      document.querySelectorAll('#carouselDots button').forEach((b, i) => b.classList.toggle('active', i === index));
+    }
+
+    function nextSlide() { goToSlide((carouselIndex + 1) % carouselData.length); }
+    function prevSlide() { goToSlide((carouselIndex - 1 + carouselData.length) % carouselData.length); }
+    function startAutoSlide() { stopAutoSlide(); if (carouselData.length > 1) carouselTimer = setInterval(nextSlide, 4000); }
+    function stopAutoSlide() { if (carouselTimer) clearInterval(carouselTimer); }
+
+    function initCarouselControls() {
+      document.getElementById('carouselPrev').addEventListener('click', () => { prevSlide(); stopAutoSlide(); startAutoSlide(); });
+      document.getElementById('carouselNext').addEventListener('click', () => { nextSlide(); stopAutoSlide(); startAutoSlide(); });
+      const carousel = document.getElementById('homeCarousel');
+      carousel.addEventListener('mouseenter', stopAutoSlide);
+      carousel.addEventListener('mouseleave', startAutoSlide);
+    }
+
+    // ── 渲染主页展示区（键盘/鼠标/耳机） ──
+    function renderShowcase(category, allShowcases) {
+      const containerId = category === 'keyboard' ? 'keyboardGrid' : (category === 'mouse' ? 'mouseGrid' : 'headphoneGrid');
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      const catIcon = category === 'keyboard' ? '键盘' : (category === 'mouse' ? '鼠标' : '耳机');
+      const limit = 8;
+
+      const items = allShowcases
+        .filter(s => { const p = productMap[s.productId]; return p && p.category === category; })
+        .slice(0, limit);
+
+      if (items.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon"><img src="/ICON/暂无数据.svg" class="icon-svg icon-svg-xl" alt=""></div><p>暂无产品</p></div>`;
+        return;
+      }
+
+      container.innerHTML = items.map(item => {
+        const prod = productMap[item.productId] || {};
+        return `
+        <a href="detail.html?id=${item.productId}" class="product-card">
+          <div class="card-img-43">
+            ${item.image ? `<img src="${item.image}" alt="${prod.name || item.productId}" loading="lazy" decoding="async">` : `<span class="placeholder"><img src="/ICON/${catIcon}.svg" class="icon-svg icon-svg-xl" alt="" style="opacity:0.15;"></span>`}
+          </div>
+          <div class="card-info">
+            <div class="card-name">${prod.name || item.productId}</div>
+            <div class="card-subtitle">${item.description || ''}</div>
+          </div>
+        </a>
+      `}).join('');
+
+      if (window.I18N) I18N.updatePage();
+    }
+
+    // 横向滚动按钮
+    function initScrollButtons() {
+      const scrollContainers = [
+        { scrollId: 'keyboardGrid', prevId: 'keyboardScrollPrev', nextId: 'keyboardScrollNext' },
+        { scrollId: 'mouseGrid', prevId: 'mouseScrollPrev', nextId: 'mouseScrollNext' },
+        { scrollId: 'headphoneGrid', prevId: 'headphoneScrollPrev', nextId: 'headphoneScrollNext' }
+      ];
+      scrollContainers.forEach(({ scrollId, prevId, nextId }) => {
+        const scrollEl = document.getElementById(scrollId);
+        const prevBtn = document.getElementById(prevId);
+        const nextBtn = document.getElementById(nextId);
+        if (!scrollEl || !prevBtn || !nextBtn) return;
+        const scrollAmount = 340;
+        prevBtn.addEventListener('click', () => scrollEl.scrollBy({ left: -scrollAmount, behavior: 'smooth' }));
+        nextBtn.addEventListener('click', () => scrollEl.scrollBy({ left: scrollAmount, behavior: 'smooth' }));
+      });
+    }
+  </script>
+</body>
+</html>

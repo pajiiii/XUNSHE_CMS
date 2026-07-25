@@ -1,0 +1,290 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="XUNSHE 驱动下载 — 获取最新驱动，释放设备全部潜能">
+  <title data-i18n="drivers.title">驱动下载 — XUNSHE 迅蛇</title>
+  <link rel="icon" type="image/png" href="/logo/RED_LOGO.png">
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    /* ── 页面头部 ── */
+    .page-header {
+      padding: 100px 24px 48px;
+      text-align: center;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255,0,21,0.08) 0%, transparent 60%);
+    }
+
+    .page-header h1 {
+      font-family: var(--font-en);
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+
+    .page-header h1 .red { color: var(--red-primary); }
+
+    /* ── 驱动列表 ── */
+    .drivers-section {
+      padding: 0 24px 80px;
+    }
+
+    .drivers-list {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .driver-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: all var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .driver-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      box-shadow: inset 0 0 30px var(--red-dim);
+      transition: opacity var(--transition-smooth);
+      pointer-events: none;
+    }
+
+    .driver-card:hover {
+      border-color: rgba(255,0,21,0.35);
+      transform: translateX(4px);
+    }
+
+    .driver-card:hover::before { opacity: 1; }
+
+    .driver-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-sm);
+      background: rgba(255,0,21,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .driver-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .driver-info .driver-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .driver-info .driver-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .driver-info .driver-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .driver-info .driver-desc {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .driver-download {
+      flex-shrink: 0;
+    }
+
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--red-primary);
+      color: #fff;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+      box-shadow: 0 4px 16px var(--red-glow);
+    }
+
+    .download-btn:hover {
+      background: #ff2222;
+      color: #fff;
+      box-shadow: 0 6px 24px rgba(255,0,21,0.55);
+      transform: translateY(-2px);
+    }
+
+    /* ── 加载状态 ── */
+    .loading-spinner {
+      display: inline-block;
+      width: 40px; height: 40px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top-color: var(--red-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.4; }
+
+    /* ── 响应式 ── */
+    @media (max-width: 640px) {
+      .page-header h1 { font-size: 1.8rem; }
+      .driver-card { flex-direction: column; align-items: flex-start; }
+      .driver-download { width: 100%; }
+      .download-btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ 顶部导航 ═══ -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+          <img src="/logo/xunshe_top.png" class="brand-icon" style="width:168px;height:42px;border-radius:6px;" alt="XUNSHE">
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" data-i18n="nav.home"><img src="/ICON/主页.svg" class="icon-svg icon-svg-sm" alt=""> 首页</a></li>
+        <li><a href="products.html" data-i18n="nav.products"><img src="/ICON/产品中心.svg" class="icon-svg icon-svg-sm" alt=""> 产品中心</a></li>
+        <li><a href="drivers.html" data-i18n="nav.drivers"><img src="/ICON/驱动支持.svg" class="icon-svg icon-svg-sm" alt=""> 驱动下载</a></li>
+      </ul>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="lang-switch">
+          <button data-lang="zh-CN" class="active">简</button>
+          <button data-lang="zh-TC">繁</button>
+          <button data-lang="en">EN</button>
+        </div>
+        <button class="nav-toggle" aria-label="菜单">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-container">
+    <!-- ═══ 页面头部 ═══ -->
+    <section class="page-header" data-animate>
+      <h1><span class="red"><img src="/ICON/驱动支持.svg" class="icon-svg icon-svg-lg icon-red" alt=""></span> <span data-i18n="drivers.title">驱动下载</span></h1>
+      <p class="section-subtitle" data-i18n="drivers.subtitle">下载最新驱动，释放设备全部潜能</p>
+    </section>
+
+    <!-- ═══ 驱动列表 ═══ -->
+    <section class="drivers-section">
+      <div class="drivers-list" id="driversList">
+        <div style="text-align:center;padding:40px;">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══ 页脚 ═══ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand"><span class="brand-red">XUNSHE</span> 迅蛇</div>
+        <p class="footer-desc">专业电竞外设品牌。以蛇之迅捷，铸胜利之器。</p>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.products">产品</h4>
+        <a href="products.html?category=keyboard">电竞键盘</a>
+        <a href="products.html?category=mouse">电竞鼠标</a>
+        <a href="products.html">全部产品</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.support">支持</h4>
+        <a href="drivers.html">驱动下载</a>
+        <a href="#">使用手册</a>
+        <a href="#">售后服务</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.company">公司</h4>
+        <a href="#">关于我们</a>
+        <a href="#">联系我们</a>
+        <a href="#">加入我们</a>
+      </div>
+    </div>
+    <div class="footer-inner footer-bottom">
+      <span data-i18n="footer.rights">© 2026 XUNSHE. All rights reserved.</span>
+      <span data-i18n="footer.icp">浙ICP备XXXXXXXX号</span>
+    </div>
+  </footer>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/common.js"></script>
+  <script>
+    // ── 驱动页逻辑 ──
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDrivers();
+    });
+
+    async function loadDrivers() {
+      const list = document.getElementById('driversList');
+      try {
+        const res = await API.get('/content/drivers', { sort: 'sortOrder', limit: 50 });
+        const items = res.data?.items || [];
+
+        if (items.length === 0) {
+          list.innerHTML = `<div class="empty-state"><div class="empty-icon"><img src="/ICON/暂无数据.svg" class="icon-svg icon-svg-xl" alt=""></div><p data-i18n="drivers.empty">暂无驱动</p></div>`;
+          I18N.updatePage();
+          return;
+        }
+
+        list.innerHTML = items.map(item => `
+          <div class="driver-card">
+            <div class="driver-icon"><img src="/ICON/${item.category === 'mouse' ? '鼠标' : (item.category === 'headphone' ? '耳机' : '键盘')}.svg" class="icon-svg icon-svg-lg" alt="" style="opacity:0.7;"></div>
+            <div class="driver-info">
+              <div class="driver-name">${item.name || ''}</div>
+              <div class="driver-meta">
+                <span>${item.category === 'keyboard' ? '键盘' : (item.category === 'mouse' ? '鼠标' : '耳机')}</span>
+              </div>
+              ${item.description ? `<div class="driver-desc">${item.description}</div>` : ''}
+            </div>
+            <div class="driver-download">
+              ${item.fileUrl ? `<a href="${item.fileUrl}" class="download-btn"><span data-i18n="drivers.download">下载客户端</span></a>` : ''}
+              ${item.webUrl ? `<a href="${item.webUrl}" class="download-btn" style="background:var(--bg-card);border:1px solid var(--border-card);${item.fileUrl ? 'margin-top:8px;' : ''}box-shadow:none;" target="_blank">网页驱动</a>` : ''}
+            </div>
+          </div>
+        `).join('');
+
+        I18N.updatePage();
+      } catch (e) {
+        console.error('加载驱动列表失败:', e);
+        list.innerHTML = `<div class="empty-state"><div class="empty-icon"><img src="/ICON/暂无数据.svg" class="icon-svg icon-svg-xl" alt=""></div><p data-i18n="common.error">加载失败，请稍后重试</p></div>`;
+        I18N.updatePage();
+      }
+    }
+  </script>
+</body>
+</html>

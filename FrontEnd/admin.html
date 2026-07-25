@@ -1,0 +1,1292 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>管理后台 — XUNSHE 迅蛇</title>
+  <link rel="icon" type="image/png" href="/logo/RED_LOGO.png">
+  <style>
+    /* ── 管理后台独立样式（不依赖 common.css） ── */
+    :root {
+      --bg: #0d0d0e;
+      --bg-card: #252527;
+      --bg-input: #2c2c2d;
+      --red: #ff3143;
+      --red-glow: rgba(255,0,21,0.4);
+      --text: #e0e0e8;
+      --text-secondary: #a5a5ad;
+      --border: rgba(255,255,255,0.08);
+      --radius: 8px;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'PingFang SC','Microsoft YaHei',sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    a { color: var(--red); text-decoration: none; }
+
+    /* ── 登录遮罩 ── */
+    .login-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+    }
+
+    .login-overlay.hidden { display: none; }
+
+    .login-box {
+      background: var(--bg-card);
+      padding: 40px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      width: 360px;
+      max-width: 90vw;
+    }
+
+    .login-box h1 {
+      text-align: center;
+      font-size: 1.3rem;
+      margin-bottom: 24px;
+      color: var(--red);
+    }
+
+    .login-box label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+    }
+
+    .login-box input:focus { outline:none; border-color:var(--red); }
+
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .login-error {
+      color: var(--red);
+      font-size: 0.85rem;
+      text-align: center;
+      min-height: 20px;
+    }
+
+    /* ── 主布局 ── */
+    .admin-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      padding: 20px 0;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      padding: 0 20px 20px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      color: var(--red);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 10px 20px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar a:hover, .sidebar a.active {
+      color: var(--text);
+      background: rgba(255,0,21,0.06);
+      border-left-color: var(--red);
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 24px;
+      min-width: 0;
+    }
+
+    /* ── 头部工具栏 ── */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .toolbar h2 {
+      font-size: 1.3rem;
+      color: var(--red);
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 18px; border-radius: 4px;
+      font-weight: 600; font-size: 0.88rem;
+      cursor: pointer; border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary { background: var(--red); color: #fff; }
+    .btn-primary:hover { background: #ff2222; }
+    .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--red); color: var(--text); }
+    .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+    .btn-danger { background: transparent; color: #ff0015; border: 1px solid rgba(255,0,21,0.3); }
+    .btn-danger:hover { background: rgba(255,0,21,0.1); }
+
+    /* ── 数据表格 ── */
+    .table-wrap {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background: rgba(0,0,0,0.3);
+      padding: 12px 14px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      vertical-align: middle;
+      color: var(--text);
+    }
+
+    td.actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    tr:hover td { background: rgba(255,0,21,0.03); }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .badge-active { background: rgba(46,204,113,0.15); color: #2ecc71; }
+    .badge-inactive { background: rgba(149,165,166,0.15); color: #95a5a6; }
+
+    .loading-text { text-align: center; padding: 40px; color: var(--text-secondary); }
+    .empty-text { text-align: center; padding: 40px; color: var(--text-secondary); }
+
+    /* ── 模态框 ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      display: flex; align-items: flex-start; justify-content: center;
+      z-index: 1000; padding-top: 60px;
+    }
+
+    .modal-overlay.hidden { display: none; }
+
+    .modal {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      width: 600px;
+      max-width: 95vw;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: var(--bg-card);
+      z-index: 1;
+    }
+
+    .modal-header h3 { font-size: 1.05rem; color: var(--red); }
+
+    .modal-close {
+      background: none; border: none; color: var(--text-secondary);
+      font-size: 1.3rem; cursor: pointer; padding: 4px;
+    }
+
+    .modal-close:hover { color: var(--red); }
+
+    .modal-body { padding: 20px; }
+
+    .form-group { margin-bottom: 14px; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus { outline: none; border-color: var(--red); }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── 上传区域 ── */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .upload-zone:hover { border-color: var(--red); background: rgba(255,0,21,0.03); }
+
+    .upload-zone .upload-icon { font-size: 2rem; margin-bottom: 8px; }
+    .upload-zone p { font-size: 0.85rem; color: var(--text-secondary); }
+
+    .upload-preview {
+      margin-top: 10px;
+      max-width: 200px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .upload-preview img { width: 100%; display: block; }
+
+    /* ── 管理后台图标 ── */
+    .admin-icon {
+      width: 18px;
+      height: 18px;
+      margin-right: 6px;
+      vertical-align: middle;
+      filter: brightness(0) saturate(100%) invert(1);
+      opacity: 0.7;
+      transition: all 0.2s;
+    }
+    .sidebar a:hover .admin-icon,
+    .sidebar a.active .admin-icon {
+      opacity: 1;
+      filter: brightness(0) saturate(100%) invert(35%) sepia(85%) saturate(2500%) hue-rotate(340deg);
+    }
+    .toolbar h2 .admin-icon {
+      width: 22px; height: 22px;
+      filter: brightness(0) saturate(100%) invert(35%) sepia(85%) saturate(2500%) hue-rotate(340deg);
+      opacity: 1;
+    }
+    .btn .admin-icon { width: 16px; height: 16px; }
+    .btn-outline .admin-icon { filter: brightness(0) saturate(100%) invert(1); opacity: 0.7; }
+    .btn-outline:hover .admin-icon { opacity: 1; filter: brightness(0) saturate(100%) invert(35%) sepia(85%) saturate(2500%) hue-rotate(340deg); }
+    .btn-primary .admin-icon { filter: brightness(0) invert(1); opacity: 1; }
+
+    /* ── 响应式 ── */
+    @media (max-width: 768px) {
+      .admin-layout { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: static; display: flex; overflow-x: auto; padding: 0; }
+      .sidebar a { white-space: nowrap; padding: 12px 16px; border-left: none; border-bottom: 3px solid transparent; }
+      .sidebar a.active { border-left: none; border-bottom-color: var(--red); }
+      .sidebar-header { display: none; }
+      .form-row { grid-template-columns: 1fr; }
+      td.actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ 登录遮罩 ═══ -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+      <h1><img src="/logo/XUNSHE_transparent.png" style="width:28px;height:28px;border-radius:4px;vertical-align:middle;margin-right:8px;" alt="">XUNSHE 管理后台</h1>
+      <div>
+        <label>用户名</label>
+        <input type="text" id="loginUser" placeholder="管理员用户名" autocomplete="username">
+      </div>
+      <div>
+        <label>密码</label>
+        <input type="password" id="loginPass" placeholder="管理员密码" autocomplete="current-password">
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <button id="loginBtn">登 录</button>
+    </div>
+  </div>
+
+  <!-- ═══ 主布局 ═══ -->
+  <div class="admin-layout hidden" id="adminLayout">
+    <!-- 侧边栏 -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">XUNSHE ADMIN</div>
+      <a href="#" data-collection="products" class="active"><img src="/ICON/产品管理.svg" class="admin-icon" alt=""> ① 产品目录</a>
+      <a href="#" data-collection="product-images"><img src="/ICON/产品中心.svg" class="admin-icon" alt=""> ② 产品白底图</a>
+      <a href="#" data-collection="home-carousel"><img src="/ICON/首页轮播图.svg" class="admin-icon" alt=""> ③ 主页轮播</a>
+      <a href="#" data-collection="home-showcase"><img src="/ICON/产品.svg" class="admin-icon" alt=""> ④ 主页展示</a>
+      <a href="#" data-collection="drivers"><img src="/ICON/驱动支持.svg" class="admin-icon" alt=""> ⑤ 驱动管理</a>
+      <a href="#" style="margin-top:auto;color:var(--text-secondary);" id="logoutLink"><img src="/ICON/退出登录.svg" class="admin-icon" alt=""> 退出登录</a>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="main-content" id="mainContent">
+      <div class="toolbar">
+        <h2 id="collectionTitle"><img src="/ICON/产品管理.svg" class="admin-icon" alt=""> 产品管理</h2>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" id="refreshBtn"><img src="/ICON/刷新.svg" class="admin-icon" alt=""> 刷新</button>
+          <button class="btn btn-primary" id="addBtn">新增</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- ═══ 编辑模态框 ═══ -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitle">编辑数据</h3>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    // ── 管理后台逻辑 ──
+    const API_BASE = '/api';
+    let currentCollection = 'products';
+    let authToken = sessionStorage.getItem('xunshe-admin-token') || '';
+
+    // ── 集合配置（新的 5 种数据类型） ──
+    const COLLECTIONS = {
+      // ① 产品目录 — 记录所有产品的 ID、名称、类型
+      'products': {
+        title: '<img src="/ICON/产品管理.svg" class="admin-icon" alt=""> ① 产品目录',
+        fields: [
+          { name: 'productId', label: '产品ID（型号，如 M2）', type: 'text', required: true },
+          { name: 'name', label: '产品名称（如 迅蛇 M2）', type: 'text', required: true },
+          { name: 'category', label: '产品类型', type: 'select', options: ['keyboard','mouse','headphone'], required: true }
+        ],
+        columns: ['productId','name','category','createdAt']
+      },
+
+      // ② 产品中心白底图 — 用于 products.html 产品列表
+      'product-images': {
+        title: '<img src="/ICON/产品中心.svg" class="admin-icon" alt=""> ② 产品中心白底图',
+        fields: [
+          { name: 'productId', label: '产品ID（匹配型号）', type: 'product-select', required: true },
+          { name: 'image', label: '白底图（1:1）', type: 'image', required: true },
+          { name: 'buyLinks', label: '购买链接', type: 'buyLinks' },
+          { name: 'colors', label: '颜色变体', type: 'colors' },
+          { name: 'sortOrder', label: '排序', type: 'number' },
+          { name: 'isActive', label: '启用', type: 'checkbox' }
+        ],
+        columns: ['productId','image','buyLinks','colors','sortOrder','isActive','createdAt']
+      },
+
+      // ③ 主页轮播图 — 用于 index.html 轮播图区域
+      'home-carousel': {
+        title: '<img src="/ICON/首页轮播图.svg" class="admin-icon" alt=""> ③ 主页轮播图',
+        fields: [
+          { name: 'productId', label: '产品ID（匹配型号获取名称）', type: 'product-select', required: true },
+          { name: 'image', label: '轮播图（2:1）', type: 'image', required: true },
+          { name: 'description', label: '产品描述文字', type: 'textarea' },
+          { name: 'sortOrder', label: '排序', type: 'number' },
+          { name: 'isActive', label: '启用', type: 'checkbox' }
+        ],
+        columns: ['productId','description','image','sortOrder','isActive','createdAt']
+      },
+
+      // ④ 主页展示图 — 用于 index.html 电竞键盘/鼠标下方展示栏
+      'home-showcase': {
+        title: '<img src="/ICON/产品.svg" class="admin-icon" alt=""> ④ 主页展示图',
+        fields: [
+          { name: 'productId', label: '产品ID（匹配型号获取名称和种类）', type: 'product-select', required: true },
+          { name: 'image', label: '展示图（4:3）', type: 'image', required: true },
+          { name: 'description', label: '产品描述文字', type: 'textarea' },
+          { name: 'sortOrder', label: '排序', type: 'number' },
+          { name: 'isActive', label: '启用', type: 'checkbox' }
+        ],
+        columns: ['productId','description','image','sortOrder','isActive','createdAt']
+      },
+
+      // ⑤ 驱动支持 — 用于 drivers.html 驱动下载页面
+      'drivers': {
+        title: '<img src="/ICON/驱动支持.svg" class="admin-icon" alt=""> ⑤ 驱动管理',
+        fields: [
+          { name: 'category', label: '驱动种类', type: 'select', options: ['keyboard','mouse','headphone'], required: true },
+          { name: 'name', label: '驱动名称', type: 'text', required: true },
+          { name: 'description', label: '驱动描述（适配型号等）', type: 'textarea' },
+          { name: 'fileUrl', label: '客户端文件（已上传路径，选填）', type: 'text' },
+          { name: 'webUrl', label: '网页端链接（选填）', type: 'text' },
+          { name: 'sortOrder', label: '排序', type: 'number' },
+          { name: 'isActive', label: '启用', type: 'checkbox' }
+        ],
+        columns: ['category','name','description','fileUrl','webUrl','sortOrder','isActive','createdAt']
+      }
+    };
+
+    // ── 初始化 ──
+    document.addEventListener('DOMContentLoaded', () => {
+      if (authToken) {
+        verifyAndEnter();
+      }
+      setupLogin();
+      setupSidebar();
+      setupButtons();
+    });
+
+    // ── 登录 ──
+    function setupLogin() {
+      document.getElementById('loginBtn').addEventListener('click', doLogin);
+      document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    }
+
+    async function doLogin() {
+      const user = document.getElementById('loginUser').value.trim();
+      const pass = document.getElementById('loginPass').value.trim();
+      const errEl = document.getElementById('loginError');
+
+      if (!user || !pass) { errEl.textContent = '请输入用户名和密码'; return; }
+
+      authToken = btoa(user + ':' + pass);
+      await verifyAndEnter();
+    }
+
+    async function verifyAndEnter() {
+      const errEl = document.getElementById('loginError');
+      try {
+        const res = await fetch(`${API_BASE}/content/products/all?limit=1`, {
+          headers: { 'Authorization': 'Basic ' + authToken }
+        });
+        if (res.status === 401 || res.status === 403) {
+          authToken = '';
+          sessionStorage.removeItem('xunshe-admin-token');
+          errEl.textContent = '认证失败，请检查用户名和密码';
+          return;
+        }
+        if (!res.ok) throw new Error('验证失败');
+
+        sessionStorage.setItem('xunshe-admin-token', authToken);
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('adminLayout').classList.remove('hidden');
+        loadCollection('products');
+      } catch (e) {
+        errEl.textContent = '连接服务器失败: ' + e.message;
+      }
+    }
+
+    // ── 侧边栏 ──
+    function setupSidebar() {
+      document.querySelectorAll('#sidebar a[data-collection]').forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          const col = link.dataset.collection;
+          document.querySelectorAll('#sidebar a').forEach(a => a.classList.remove('active'));
+          link.classList.add('active');
+          loadCollection(col);
+        });
+      });
+
+      document.getElementById('logoutLink').addEventListener('click', e => {
+        e.preventDefault();
+        authToken = '';
+        sessionStorage.removeItem('xunshe-admin-token');
+        document.getElementById('loginOverlay').classList.remove('hidden');
+        document.getElementById('adminLayout').classList.add('hidden');
+        document.getElementById('loginUser').value = '';
+        document.getElementById('loginPass').value = '';
+        document.getElementById('loginError').textContent = '';
+      });
+    }
+
+    // ── 按钮 ──
+    function setupButtons() {
+      document.getElementById('refreshBtn').addEventListener('click', () => loadCollection(currentCollection));
+      document.getElementById('addBtn').addEventListener('click', () => openModal());
+      document.getElementById('modalClose').addEventListener('click', closeModal);
+      document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+    }
+
+    // ── 加载数据 ──
+    async function loadCollection(collection) {
+      currentCollection = collection;
+      const config = COLLECTIONS[collection];
+      document.getElementById('collectionTitle').innerHTML = config.title;
+
+      const thead = document.getElementById('tableHead');
+      const tbody = document.getElementById('tableBody');
+
+      thead.innerHTML = `<tr>${config.columns.map(c => `<th>${c}</th>`).join('')}<th>操作</th></tr>`;
+      tbody.innerHTML = '<tr><td colspan="100" class="loading-text">加载中...</td></tr>';
+
+      try {
+        const res = await fetch(`${API_BASE}/content/${collection}/all`, {
+          headers: { 'Authorization': 'Basic ' + authToken }
+        });
+        if (res.status === 401) { handleAuthExpired(); return; }
+        if (!res.ok) throw new Error('加载失败');
+
+        const json = await res.json();
+        const items = json.data?.items || [];
+
+        if (items.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="100" class="empty-text">暂无数据</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = items.map(item => `
+          <tr>
+            ${config.columns.map(c => {
+              let val = getNestedValue(item, c);
+              if (c === 'isActive') val = `<span class="badge ${val ? 'badge-active' : 'badge-inactive'}">${val ? '启用' : '禁用'}</span>`;
+              else if (c === 'createdAt' || c === 'updatedAt') val = formatDateTime(val);
+              else if (typeof val === 'object') val = JSON.stringify(val).substring(0, 60);
+              else val = String(val || '').substring(0, 80);
+              return `<td>${val}</td>`;
+            }).join('')}
+            <td class="actions">
+              <button class="btn btn-outline btn-sm edit-btn" data-id="${item._id}">编辑</button>
+              <button class="btn btn-danger btn-sm del-btn" data-id="${item._id}">删除</button>
+            </td>
+          </tr>
+        `).join('');
+
+        // 绑定编辑/删除事件
+        tbody.querySelectorAll('.edit-btn').forEach(btn => {
+          btn.addEventListener('click', () => openModal(btn.dataset.id));
+        });
+        tbody.querySelectorAll('.del-btn').forEach(btn => {
+          btn.addEventListener('click', () => deleteItem(btn.dataset.id));
+        });
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="100" class="empty-text">加载失败: ${e.message}</td></tr>`;
+      }
+    }
+
+    // ── 动态字段渲染：购买链接 ──
+    function renderBuyLinksField(links) {
+      const itemsHtml = links.map((link, i) => `
+        <div class="dynamic-row" data-index="${i}" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+          <input type="text" class="buy-platform" value="${escapeHtml(link.platform || '')}" placeholder="平台（如 京东）" style="flex:1;min-width:100px;padding:7px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;">
+          <input type="text" class="buy-label" value="${escapeHtml(link.label || '')}" placeholder="按钮文字" style="flex:1;min-width:100px;padding:7px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;">
+          <input type="text" class="buy-url" value="${escapeHtml(link.url || '')}" placeholder="链接 URL" style="flex:2;min-width:150px;padding:7px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;">
+          <button type="button" class="btn btn-danger btn-sm dynamic-remove-btn" title="删除此链接" style="flex-shrink:0;">✕</button>
+        </div>
+      `).join('');
+
+      return `<div class="form-group dynamic-field" data-field="buyLinks">
+        <label>购买链接 <span style="font-size:0.78rem;color:var(--text-muted);">（可自由添加/删除）</span></label>
+        <div class="dynamic-rows">${itemsHtml || '<div class="dynamic-empty" style="font-size:0.82rem;color:var(--text-muted);padding:8px 0;">暂无购买链接，点击下方按钮添加</div>'}</div>
+        <button type="button" class="btn btn-outline btn-sm dynamic-add-btn" style="margin-top:8px;">+ 添加购买链接</button>
+      </div>`;
+    }
+
+    // ── 动态字段渲染：颜色变体 ──
+    function renderColorsField(colors) {
+      const itemsHtml = colors.map((c, i) => `
+        <div class="dynamic-row" data-index="${i}" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+          <input type="text" class="color-name" value="${escapeHtml(c.name || '')}" placeholder="颜色名称" style="flex:1;min-width:120px;padding:7px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;">
+          <div style="display:flex;gap:6px;align-items:center;flex:2;min-width:200px;">
+            <input type="text" class="color-image" value="${escapeHtml(c.image || '')}" placeholder="颜色图 URL" style="flex:1;padding:7px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;">
+            <button type="button" class="btn btn-outline btn-sm color-img-upload-btn" title="上传颜色图" style="flex-shrink:0;white-space:nowrap;">上传</button>
+            <input type="file" accept="image/*" style="display:none;" class="color-img-upload-input">
+          </div>
+          ${c.image ? `<img src="${c.image}" style="width:36px;height:36px;border-radius:4px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;" alt="${c.name}">` : ''}
+          <button type="button" class="btn btn-danger btn-sm dynamic-remove-btn" title="删除此颜色" style="flex-shrink:0;">✕</button>
+        </div>
+      `).join('');
+
+      return `<div class="form-group dynamic-field" data-field="colors">
+        <label>颜色变体 <span style="font-size:0.78rem;color:var(--text-muted);">（可自由添加/删除，每个颜色包含名称和图片）</span></label>
+        <div class="dynamic-rows">${itemsHtml || '<div class="dynamic-empty" style="font-size:0.82rem;color:var(--text-muted);padding:8px 0;">暂无颜色变体，点击下方按钮添加</div>'}</div>
+        <button type="button" class="btn btn-outline btn-sm dynamic-add-btn" style="margin-top:8px;">+ 添加颜色变体</button>
+      </div>`;
+    }
+
+    // ── 模态框 ──
+    async function openModal(id = null) {
+      const config = COLLECTIONS[currentCollection];
+      const overlay = document.getElementById('modalOverlay');
+      const title = document.getElementById('modalTitle');
+      const body = document.getElementById('modalBody');
+
+      title.textContent = id ? '编辑数据' : '新增数据';
+      overlay.classList.remove('hidden');
+
+      let data = {};
+      if (id) {
+        try {
+          const res = await fetch(`${API_BASE}/content/${currentCollection}/all`, {
+            headers: { 'Authorization': 'Basic ' + authToken }
+          });
+          const json = await res.json();
+          data = (json.data?.items || []).find(item => item._id === id) || {};
+        } catch (e) { /* ignore */ }
+      }
+
+      // 构建表单
+      let formHtml = `<div class="form-row">
+          ${config.fields.map(f => {
+            if (f.type === 'checkbox') {
+              const checked = getNestedValue(data, f.name) !== false;
+              return `<div class="form-group"><label>${f.label}${f.required?' *':''}</label>
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                  <input type="checkbox" name="${f.name}" ${checked?'checked':''} style="width:auto;">
+                  <span style="font-size:0.85rem;color:var(--text-secondary);">启用</span>
+                </label></div>`;
+            }
+            if (f.type === 'select') {
+              const val = getNestedValue(data, f.name) || '';
+              return `<div class="form-group"><label>${f.label}${f.required?' *':''}</label>
+                <select name="${f.name}">${f.options.map(o => `<option value="${o}" ${val===o?'selected':''}>${o}</option>`).join('')}</select></div>`;
+            }
+            if (f.type === 'product-select') {
+              const val = getNestedValue(data, f.name) || '';
+              return `<div class="form-group"><label>${f.label}${f.required?' *':''}</label>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <input type="text" name="${f.name}" value="${escapeHtml(String(val))}" list="productIdList" ${f.required?'required':''} style="flex:1;" placeholder="输入型号或从列表选择">
+                  <datalist id="productIdList"></datalist>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;" class="product-id-hint">输入产品ID后将自动显示名称和类型</div></div>`;
+            }
+            if (f.type === 'textarea') {
+              const val = getNestedValue(data, f.name) || '';
+              return `<div class="form-group"><label>${f.label}${f.required?' *':''}</label>
+                <textarea name="${f.name}" rows="3">${escapeHtml(val)}</textarea></div>`;
+            }
+            if (f.type === 'buyLinks') {
+              const links = Array.isArray(data.buyLinks) ? data.buyLinks : [];
+              return renderBuyLinksField(links);
+            }
+            if (f.type === 'colors') {
+              const colors = Array.isArray(data.colors) ? data.colors : [];
+              return renderColorsField(colors);
+            }
+            if (f.type === 'image') {
+              const val = getNestedValue(data, f.name) || '';
+              return `<div class="form-group"><label>${f.label}${f.required?' *':''}</label>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <input type="text" name="${f.name}" value="${escapeHtml(String(val))}" ${f.required?'required':''} style="flex:1;">
+                  <button type="button" class="btn btn-outline btn-sm img-upload-btn" data-target="${f.name}" style="flex-shrink:0;white-space:nowrap;">上传</button>
+                </div>
+                ${val ? `<div style="margin-top:6px;"><img src="${val}" style="max-width:120px;max-height:80px;border-radius:4px;border:1px solid var(--border);" alt="预览"></div>` : ''}
+                <input type="file" accept="image/*" style="display:none;" class="img-upload-input" data-target="${f.name}"></div>`;
+            }
+            const val = getNestedValue(data, f.name) || '';
+            return `<div class="form-group"><label>${f.label}${f.required?' *':''}</label>
+              <input type="${f.type}" name="${f.name}" value="${escapeHtml(String(val))}" ${f.required?'required':''}></div>`;
+          }).join('')}
+        </div>`;
+
+      // 非 drivers 且有图片类字段时显示通用图片上传
+      const imageFields = config.fields.filter(f => f.type === 'image');
+      if (currentCollection !== 'drivers' && imageFields.length > 0) {
+        formHtml += `
+        <div class="form-group" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+          <label>通用图片上传 <span style="font-size:0.78rem;color:var(--text-muted);">（上传后点击字段旁的 [上传] 按钮快速填入）</span></label>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div class="upload-zone" id="imageUploadZone" style="flex:1;min-width:200px;">
+              <div class="upload-icon">+</div>
+              <p>点击或拖拽上传图片</p>
+              <input type="file" accept="image/*" style="display:none;" id="imageFileInput">
+            </div>
+            <div style="flex-shrink:0;">
+              <select id="imageTargetSelect" style="padding:8px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;">
+                <option value="">选择目标字段...</option>
+                ${imageFields.map(f => `<option value="${f.name}">${f.label}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <div class="upload-preview hidden" id="imagePreview"></div>
+          <div id="imageUploadResult" style="margin-top:6px;font-size:0.82rem;color:var(--text-muted);"></div>
+        </div>`;
+      }
+
+      // drivers 专用：驱动客户端文件上传
+      if (currentCollection === 'drivers') {
+        formHtml += `
+        <div class="form-group" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+          <label>上传驱动客户端文件 <span style="font-size:0.78rem;color:var(--text-muted);">（限制 200MB，选填）</span></label>
+          <div class="upload-zone" id="driverUploadZone">
+            <div class="upload-icon">+</div>
+            <p>点击上传驱动文件 (zip, exe, rar...)</p>
+            <input type="file" accept=".zip,.rar,.7z,.exe,.msi,.dmg,.pkg,.tar.gz,.deb,.rpm" style="display:none;" id="driverFileInput">
+          </div>
+          <div id="driverFileInfo" style="margin-top:8px;font-size:0.85rem;color:var(--text-secondary);"></div>
+          <input type="hidden" id="uploadedDriverUrl">
+        </div>`;
+      }
+
+      formHtml += `
+        <div class="form-actions">
+          <button class="btn btn-outline" onclick="closeModal()">取消</button>
+          <button class="btn btn-primary" id="saveBtn">${id ? '更新' : '创建'}</button>
+        </div>
+      `;
+
+      body.innerHTML = formHtml;
+
+      // ── 图片上传区域事件 ──
+      if (currentCollection !== 'drivers') {
+        const imgZone = document.getElementById('imageUploadZone');
+        const imgInput = document.getElementById('imageFileInput');
+        if (imgZone && imgInput) {
+          imgZone.addEventListener('click', () => imgInput.click());
+          imgZone.addEventListener('dragover', e => { e.preventDefault(); imgZone.style.borderColor = 'var(--red)'; });
+          imgZone.addEventListener('dragleave', () => { imgZone.style.borderColor = 'var(--border)'; });
+          imgZone.addEventListener('drop', e => {
+            e.preventDefault();
+            imgZone.style.borderColor = 'var(--border)';
+            if (e.dataTransfer.files.length) uploadImageFile(e.dataTransfer.files[0]);
+          });
+          imgInput.addEventListener('change', () => {
+            if (imgInput.files.length) uploadImageFile(imgInput.files[0]);
+          });
+        }
+      }
+
+      // ── 各字段旁的上传按钮事件 ──
+      document.querySelectorAll('.img-upload-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.dataset.target;
+          const input = document.querySelector(`.img-upload-input[data-target="${target}"]`);
+          if (input) input.click();
+        });
+      });
+      document.querySelectorAll('.img-upload-input').forEach(input => {
+        input.addEventListener('change', () => {
+          if (input.files.length) {
+            const target = input.dataset.target;
+            uploadAndFillField(input.files[0], target);
+          }
+        });
+      });
+
+      // ── 动态字段事件（购买链接 / 颜色变体） ──
+      document.querySelectorAll('.dynamic-add-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const field = btn.closest('.dynamic-field');
+          const fieldName = field.dataset.field;
+          const rows = field.querySelector('.dynamic-rows');
+          const empty = rows.querySelector('.dynamic-empty');
+          if (empty) empty.remove();
+
+          if (fieldName === 'buyLinks') {
+            const idx = rows.querySelectorAll('.dynamic-row').length;
+            const row = document.createElement('div');
+            row.className = 'dynamic-row';
+            row.dataset.index = idx;
+            row.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;';
+            row.innerHTML = `
+              <input type="text" class="buy-platform" placeholder="平台（如 京东）" style="flex:1;min-width:100px;padding:7px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;">
+              <input type="text" class="buy-label" placeholder="按钮文字" style="flex:1;min-width:100px;padding:7px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;">
+              <input type="text" class="buy-url" placeholder="链接 URL" style="flex:2;min-width:150px;padding:7px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;">
+              <button type="button" class="btn btn-danger btn-sm dynamic-remove-btn" style="flex-shrink:0;">✕</button>
+            `;
+            rows.appendChild(row);
+            bindDynamicRemove(row.querySelector('.dynamic-remove-btn'));
+          } else if (fieldName === 'colors') {
+            const idx = rows.querySelectorAll('.dynamic-row').length;
+            const row = document.createElement('div');
+            row.className = 'dynamic-row';
+            row.dataset.index = idx;
+            row.style.cssText = 'display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;';
+            row.innerHTML = `
+              <input type="text" class="color-name" placeholder="颜色名称" style="flex:1;min-width:120px;padding:7px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;">
+              <div style="display:flex;gap:6px;align-items:center;flex:2;min-width:200px;">
+                <input type="text" class="color-image" placeholder="颜色图 URL" style="flex:1;padding:7px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:0.85rem;">
+                <button type="button" class="btn btn-outline btn-sm color-img-upload-btn" style="flex-shrink:0;white-space:nowrap;">上传</button>
+                <input type="file" accept="image/*" style="display:none;" class="color-img-upload-input">
+              </div>
+              <button type="button" class="btn btn-danger btn-sm dynamic-remove-btn" style="flex-shrink:0;">✕</button>
+            `;
+            rows.appendChild(row);
+            bindDynamicRemove(row.querySelector('.dynamic-remove-btn'));
+            bindColorImageUpload(row.querySelector('.color-img-upload-btn'), row.querySelector('.color-img-upload-input'), row.querySelector('.color-image'));
+          }
+        });
+      });
+
+      // 绑定已有动态行的删除按钮
+      document.querySelectorAll('.dynamic-remove-btn').forEach(btn => bindDynamicRemove(btn));
+
+      // 绑定已有颜色行的上传按钮
+      document.querySelectorAll('.color-img-upload-btn').forEach(btn => {
+        const row = btn.closest('.dynamic-row');
+        const input = row.querySelector('.color-img-upload-input');
+        const textField = row.querySelector('.color-image');
+        if (input && textField) bindColorImageUpload(btn, input, textField);
+      });
+
+      // ── 驱动上传区域事件 ──
+      if (currentCollection === 'drivers') {
+        const drvZone = document.getElementById('driverUploadZone');
+        const drvInput = document.getElementById('driverFileInput');
+        if (drvZone && drvInput) {
+          drvZone.addEventListener('click', () => drvInput.click());
+          drvZone.addEventListener('dragover', e => { e.preventDefault(); drvZone.style.borderColor = 'var(--red)'; });
+          drvZone.addEventListener('dragleave', () => { drvZone.style.borderColor = 'var(--border)'; });
+          drvZone.addEventListener('drop', e => {
+            e.preventDefault();
+            drvZone.style.borderColor = 'var(--border)';
+            if (e.dataTransfer.files.length) uploadDriverFile(e.dataTransfer.files[0]);
+          });
+          drvInput.addEventListener('change', () => {
+            if (drvInput.files.length) uploadDriverFile(drvInput.files[0]);
+          });
+        }
+      }
+
+      // 保存按钮
+      document.getElementById('saveBtn').addEventListener('click', () => saveItem(id));
+
+      // ── product-select: 填充产品ID下拉列表 ──
+      if (config.fields.some(f => f.type === 'product-select')) {
+        populateProductDatalist();
+        // 监听 product-select 输入变化，显示产品名称和类型
+        document.querySelectorAll('input[list="productIdList"]').forEach(input => {
+          input.addEventListener('input', () => onProductIdInput(input));
+        });
+      }
+    }
+
+    // ── 通用图片上传（上传到通用区）──
+    async function uploadImageFile(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Authorization': 'Basic ' + authToken },
+          body: formData
+        });
+        if (res.status === 401) { handleAuthExpired(); return; }
+        const json = await res.json();
+        if (json.code === 200) {
+          const url = json.data.url;
+          document.getElementById('imagePreview').innerHTML = `<img src="${url}" alt="预览">`;
+          document.getElementById('imagePreview').classList.remove('hidden');
+          document.getElementById('imageUploadResult').innerHTML = `上传成功: <code style="color:var(--red);">${url}</code> — 请选择目标字段后点击 [上传] 按钮填入，或直接复制URL`;
+
+          // 自动填入选中的目标字段
+          const targetSelect = document.getElementById('imageTargetSelect');
+          if (targetSelect && targetSelect.value) {
+            const targetInput = document.querySelector(`[name="${targetSelect.value}"]`);
+            if (targetInput) {
+              targetInput.value = url;
+              showToast(`已自动填入「${targetSelect.selectedOptions[0]?.text || targetSelect.value}」`, 'success');
+            }
+          }
+        } else {
+          showToast('上传失败: ' + json.message, 'error');
+        }
+      } catch (e) {
+        showToast('上传失败: ' + e.message, 'error');
+      }
+    }
+
+    // ── 字段旁上传按钮：上传并直接填入对应字段 ──
+    async function uploadAndFillField(file, targetName) {
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Authorization': 'Basic ' + authToken },
+          body: formData
+        });
+        if (res.status === 401) { handleAuthExpired(); return; }
+        const json = await res.json();
+        if (json.code === 200) {
+          const url = json.data.url;
+          const targetInput = document.querySelector(`[name="${targetName}"]`);
+          if (targetInput) {
+            targetInput.value = url;
+            // 显示预览
+            const previewDiv = targetInput.parentElement?.querySelector('div');
+            if (targetInput.parentElement) {
+              const existingPreview = targetInput.parentElement.querySelector('img');
+              if (existingPreview) {
+                existingPreview.src = url;
+              } else {
+                const newPreview = document.createElement('div');
+                newPreview.style.cssText = 'margin-top:6px;';
+                newPreview.innerHTML = `<img src="${url}" style="max-width:120px;max-height:80px;border-radius:4px;border:1px solid var(--border);" alt="预览">`;
+                targetInput.parentElement.appendChild(newPreview);
+              }
+            }
+            showToast('上传成功，已填入字段', 'success');
+          }
+        } else {
+          showToast('上传失败: ' + json.message, 'error');
+        }
+      } catch (e) {
+        showToast('上传失败: ' + e.message, 'error');
+      }
+    }
+
+    // ── 驱动文件上传 ──
+    async function uploadDriverFile(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await fetch('/api/upload/driver', {
+          method: 'POST',
+          headers: { 'Authorization': 'Basic ' + authToken },
+          body: formData
+        });
+        if (res.status === 401) { handleAuthExpired(); return; }
+        const json = await res.json();
+        if (json.code === 200) {
+          document.getElementById('uploadedDriverUrl').value = json.data.url;
+          document.getElementById('driverFileInfo').innerHTML = `${file.name} (${json.data.sizeFormatted || formatSize(json.data.size)}) 上传成功`;
+        } else {
+          showToast('上传失败: ' + json.message, 'error');
+        }
+      } catch (e) {
+        showToast('上传失败: ' + e.message, 'error');
+      }
+    }
+
+    async function saveItem(id) {
+      const config = COLLECTIONS[currentCollection];
+      const body = {};
+
+      // 读取表单数据
+      config.fields.forEach(f => {
+        if (f.type === 'checkbox') {
+          const el = document.querySelector(`[name="${f.name}"]`);
+          setNestedValue(body, f.name, el ? el.checked : true);
+        } else if (f.type === 'buyLinks') {
+          body.buyLinks = collectBuyLinks();
+        } else if (f.type === 'colors') {
+          body.colors = collectColors();
+        } else {
+          const el = document.querySelector(`[name="${f.name}"]`);
+          if (el) setNestedValue(body, f.name, el.value);
+        }
+      });
+
+      // 驱动文件上传补充（设置 fileUrl）
+      if (currentCollection === 'drivers') {
+        const uploadedDriver = document.getElementById('uploadedDriverUrl')?.value;
+        if (uploadedDriver) body.fileUrl = uploadedDriver;
+      }
+
+      try {
+        const url = id
+          ? `${API_BASE}/content/${currentCollection}/${id}`
+          : `${API_BASE}/content/${currentCollection}`;
+        const method = id ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: { 'Authorization': 'Basic ' + authToken, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        if (res.status === 401) { handleAuthExpired(); return; }
+        const json = await res.json();
+
+        if (json.code === 200 || json.code === 201) {
+          showToast(id ? '更新成功' : '创建成功', 'success');
+          closeModal();
+          loadCollection(currentCollection);
+        } else {
+          showToast('操作失败: ' + json.message, 'error');
+        }
+      } catch (e) {
+        showToast('操作失败: ' + e.message, 'error');
+      }
+    }
+
+    async function deleteItem(id) {
+      if (!confirm('确定要删除这条数据吗？此操作不可撤销！')) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/content/${currentCollection}/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Basic ' + authToken }
+        });
+        if (res.status === 401) { handleAuthExpired(); return; }
+        const json = await res.json();
+        if (json.code === 200) {
+          showToast('删除成功', 'success');
+          loadCollection(currentCollection);
+        } else {
+          showToast('删除失败: ' + json.message, 'error');
+        }
+      } catch (e) {
+        showToast('删除失败: ' + e.message, 'error');
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.add('hidden');
+      document.getElementById('modalBody').innerHTML = '';
+    }
+
+    function handleAuthExpired() {
+      authToken = '';
+      sessionStorage.removeItem('xunshe-admin-token');
+      document.getElementById('loginOverlay').classList.remove('hidden');
+      document.getElementById('adminLayout').classList.add('hidden');
+      document.getElementById('loginError').textContent = '登录已过期，请重新登录';
+    }
+
+    // ── product-select 辅助 ──
+    let productCatalog = []; // 缓存产品目录
+
+    async function populateProductDatalist() {
+      try {
+        const res = await fetch(`${API_BASE}/content/products/all`, {
+          headers: { 'Authorization': 'Basic ' + authToken }
+        });
+        const json = await res.json();
+        productCatalog = json.data?.items || [];
+        const datalist = document.getElementById('productIdList');
+        if (datalist) {
+          datalist.innerHTML = productCatalog.map(p =>
+            `<option value="${p.productId}">${p.name} (${p.category})</option>`
+          ).join('');
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    function onProductIdInput(input) {
+      const pid = input.value.trim();
+      const hint = input.parentElement?.parentElement?.querySelector('.product-id-hint');
+      if (!hint) return;
+      const product = productCatalog.find(p => p.productId === pid);
+      if (product) {
+        hint.textContent = `✅ ${product.name} — 类型: ${product.category}`;
+        hint.style.color = '#2ecc71';
+      } else if (pid) {
+        hint.textContent = '⚠️ 未在目录中找到该产品ID，请先在「产品目录」中添加';
+        hint.style.color = '#ff3143';
+      } else {
+        hint.textContent = '输入产品ID后将自动显示名称和类型';
+        hint.style.color = '';
+      }
+    }
+
+    // ── 动态字段收集 & 辅助 ──
+    function collectBuyLinks() {
+      const rows = document.querySelectorAll('.dynamic-field[data-field="buyLinks"] .dynamic-row');
+      const links = [];
+      rows.forEach(row => {
+        const platform = row.querySelector('.buy-platform')?.value?.trim() || '';
+        const label = row.querySelector('.buy-label')?.value?.trim() || '';
+        const url = row.querySelector('.buy-url')?.value?.trim() || '';
+        if (platform || label || url) links.push({ platform, label, url });
+      });
+      return links;
+    }
+
+    function collectColors() {
+      const rows = document.querySelectorAll('.dynamic-field[data-field="colors"] .dynamic-row');
+      const colors = [];
+      rows.forEach(row => {
+        const name = row.querySelector('.color-name')?.value?.trim() || '';
+        const image = row.querySelector('.color-image')?.value?.trim() || '';
+        if (name && image) colors.push({ name, image });
+      });
+      return colors;
+    }
+
+    function bindDynamicRemove(btn) {
+      btn.addEventListener('click', () => {
+        const row = btn.closest('.dynamic-row');
+        const rows = row.parentElement;
+        row.remove();
+        // 如果全部删除，显示空提示
+        if (rows.querySelectorAll('.dynamic-row').length === 0) {
+          const field = rows.closest('.dynamic-field');
+          const fieldName = field?.dataset.field;
+          const emptyMsg = fieldName === 'buyLinks' ? '暂无购买链接，点击下方按钮添加' : '暂无颜色变体，点击下方按钮添加';
+          rows.innerHTML = `<div class="dynamic-empty" style="font-size:0.82rem;color:var(--text-muted);padding:8px 0;">${emptyMsg}</div>`;
+        }
+      });
+    }
+
+    function bindColorImageUpload(btn, fileInput, textField) {
+      btn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', async () => {
+        if (!fileInput.files.length) return;
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Authorization': 'Basic ' + authToken },
+            body: formData
+          });
+          if (res.status === 401) { handleAuthExpired(); return; }
+          const json = await res.json();
+          if (json.code === 200) {
+            textField.value = json.data.url;
+            // 更新/添加预览图
+            const row = btn.closest('.dynamic-row');
+            let img = row.querySelector('img');
+            if (img) {
+              img.src = json.data.url;
+            } else {
+              img = document.createElement('img');
+              img.src = json.data.url;
+              img.style.cssText = 'width:36px;height:36px;border-radius:4px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;';
+              img.alt = '';
+              row.appendChild(img);
+            }
+            showToast('颜色图上传成功', 'success');
+          } else {
+            showToast('上传失败: ' + json.message, 'error');
+          }
+        } catch (e) {
+          showToast('上传失败: ' + e.message, 'error');
+        }
+      });
+    }
+
+    // ── 工具函数 ──
+    function getNestedValue(obj, path) {
+      return path.split('.').reduce((o, k) => (o && o[k] !== undefined) ? o[k] : '', obj);
+    }
+
+    function setNestedValue(obj, path, value) {
+      const keys = path.split('.');
+      let current = obj;
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) current[keys[i]] = {};
+        current = current[keys[i]];
+      }
+      current[keys[keys.length - 1]] = value;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function formatDateTime(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toLocaleString('zh-CN', { year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit' });
+    }
+
+    function formatSize(bytes) {
+      if (!bytes) return '';
+      const k = 1024;
+      const sizes = ['B','KB','MB','GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function showToast(message, type = 'info') {
+      const existing = document.querySelector('.admin-toast');
+      if (existing) existing.remove();
+      const toast = document.createElement('div');
+      toast.className = 'admin-toast';
+      toast.textContent = message;
+      toast.style.cssText = `
+        position:fixed;bottom:24px;right:24px;z-index:2000;
+        padding:12px 24px;border-radius:8px;font-size:0.9rem;color:#fff;
+        background:${type==='error'?'#ff0015':type==='success'?'#2ecc71':'#1a1a26'};
+        border:1px solid ${type==='error'?'#ff0015':type==='success'?'#2ecc71':'rgba(255,255,255,0.1)'};
+        box-shadow:0 4px 20px rgba(0,0,0,0.5);
+      `;
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.style.opacity='0';toast.style.transition='opacity 0.3s';setTimeout(()=>toast.remove(),300); },3000);
+    }
+  </script>
+</body>
+</html>
