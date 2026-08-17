@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="XUNSHE 使用手册 — 了解迅蛇官网功能与使用指南">
+  <title>使用手册 — XUNSHE 迅蛇</title>
+  <link rel="icon" type="image/png" href="/logo/RED_LOGO.png">
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    .page-header {
+      padding: 100px 24px 48px;
+      text-align: center;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255,0,21,0.08) 0%, transparent 60%);
+    }
+    .page-header h1 {
+      font-family: var(--font-en);
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+    .page-header h1 .red { color: var(--red-primary); }
+    .manual-section {
+      padding: 0 24px 80px;
+    }
+    .manual-content {
+      max-width: 800px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+    }
+    .manual-content h2 {
+      font-family: var(--font-en);
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--red-primary);
+      display: inline-block;
+    }
+    .manual-content p {
+      font-size: 0.98rem;
+      line-height: 2;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    @media (max-width: 640px) {
+      .page-header h1 { font-size: 1.8rem; }
+      .manual-content { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <img src="/logo/xunshe_top.png" class="brand-icon" style="width:168px;height:42px;border-radius:6px;" alt="XUNSHE">
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" data-i18n="nav.home"><img src="/ICON/主页.svg" class="icon-svg icon-svg-sm" alt=""> 首页</a></li>
+        <li><a href="products.html" data-i18n="nav.products"><img src="/ICON/产品中心.svg" class="icon-svg icon-svg-sm" alt=""> 产品中心</a></li>
+        <li><a href="drivers.html" data-i18n="nav.drivers"><img src="/ICON/驱动支持.svg" class="icon-svg icon-svg-sm" alt=""> 驱动下载</a></li>
+      </ul>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="lang-switch">
+          <button data-lang="zh-CN" class="active">简</button>
+          <button data-lang="zh-TC">繁</button>
+          <button data-lang="en">EN</button>
+        </div>
+        <button class="nav-toggle" aria-label="菜单">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-container">
+    <section class="page-header" data-animate>
+      <h1><span class="red"><img src="/ICON/探索.svg" class="icon-svg icon-svg-lg icon-red" alt=""></span> 使用手册</h1>
+      <p class="section-subtitle">了解 XUNSHE 官网功能与使用指南</p>
+    </section>
+
+    <section class="manual-section">
+      <div class="manual-content" data-animate>
+        <h2>官网介绍</h2>
+        <p>本网站是迅蛇科技电竞系列外设产品的官方网站，主要功能是对各产品的展示以及为用户提供设备驱动的客户端下载或者网页端的技术支持。</p>
+        <p>该网站实时更新，可能会提前展示还未开售的新品，敬请期待。</p>
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand"><span class="brand-red">XUNSHE</span> 迅蛇</div>
+        <p class="footer-desc">专业电竞外设品牌。以蛇之迅捷，铸胜利之器。</p>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.products">产品</h4>
+        <a href="products.html?category=keyboard">电竞键盘</a>
+        <a href="products.html?category=mouse">电竞鼠标</a>
+        <a href="products.html?category=headphone">电竞耳机</a>
+      </div>
+      <div class="footer-col">
+        <h4 data-i18n="footer.support">支持</h4>
+        <a href="drivers.html">驱动下载</a>
+        <a href="manual.html">使用手册</a>
+        <a href="terms.html">使用协议</a>
+      </div>
+    </div>
+    <div class="footer-inner footer-bottom">
+      <span data-i18n="footer.rights">© 2026 XUNSHE. All rights reserved. 河南郑州讯蛇科技有限公司</span>
+      <span data-i18n="footer.icp">豫ICP备2026038032号</span>
+    </div>
+  </footer>
+
+  <script src="js/i18n.js"></script>
+  <script src="js/common.js"></script>
+</body>
+</html>

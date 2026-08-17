@@ -21,12 +21,11 @@ XUNSHE/
 │   │   ├── content.js         # 内容 CRUD API
 │   │   └── upload.js          # 文件上传 API
 │   ├── models/
-│   │   ├── Product.js         # 产品主表
-│   │   ├── HomeCarousel.js    # 首页轮播
-│   │   ├── HomeTag.js         # 首页快捷入口
-│   │   ├── ProductTag.js      # 产品标签
-│   │   ├── ProductDetail.js   # 产品详情
-│   │   └── Driver.js          # 驱动下载
+│   │   ├── Product.js         # ① 产品主表
+│   │   ├── ProductImage.js    # ② 产品中心白底图
+│   │   ├── HomeCarousel.js    # ③ 首页轮播图
+│   │   ├── HomeShowcase.js    # ④ 主页展示图
+│   │   └── Driver.js          # ⑤ 驱动下载
 │   ├── middleware/
 │   │   └── auth.js            # 认证中间件
 │   └── uploads/               # 上传文件目录
@@ -65,13 +64,14 @@ npm run dev
 |------|------|------|------|
 | GET | /api/content/:type | 获取公开内容 | 否 |
 | GET | /api/content/:type/all | 获取全部内容 | 是 |
+| GET | /api/content/:type/:id | 获取单条内容 | 是 |
 | POST | /api/content/:type | 新增内容 | 是 |
 | PUT | /api/content/:type/:id | 更新内容 | 是 |
 | DELETE | /api/content/:type/:id | 删除内容 | 是 |
 | POST | /api/upload | 上传图片 | 是 |
-| POST | /api/upload-driver | 上传驱动 | 是 |
+| POST | /api/upload/driver | 上传驱动文件 | 是 |
 
-内容类型 `:type`: `products`, `home-carousel`, `home-tag`, `product-tag`, `product-detail`, `driver`
+内容类型 `:type`: `products`, `product-images`, `home-carousel`, `home-showcase`, `drivers`
 
 ## 管理后台
 

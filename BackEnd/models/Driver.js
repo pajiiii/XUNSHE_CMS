@@ -18,7 +18,6 @@ driverSchema.pre('validate', function(next) {
   if (!this.fileUrl && !this.webUrl) {
     const err = new mongoose.Error.ValidationError(this);
     err.addError('fileUrl', new mongoose.Error.ValidatorError({ message: '客户端文件和网页端链接至少需要提供一个' }));
-    err.addError('webUrl', new mongoose.Error.ValidatorError({ message: '客户端文件和网页端链接至少需要提供一个' }));
     return next(err);
   }
   next();

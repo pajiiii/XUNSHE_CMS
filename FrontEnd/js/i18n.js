@@ -64,8 +64,8 @@ const I18N = {
       'footer.products': '产品',
       'footer.support': '支持',
       'footer.company': '公司',
-      'footer.rights': '© 2026 XUNSHE. All rights reserved.',
-      'footer.icp': '浙ICP备XXXXXXXX号',
+      'footer.rights': '© 2026 XUNSHE. All rights reserved. 河南郑州讯蛇科技有限公司',
+      'footer.icp': '豫ICP备2026038032号',
     },
     'en': {
       'nav.home': 'Home',
@@ -117,8 +117,8 @@ const I18N = {
       'footer.products': 'Products',
       'footer.support': 'Support',
       'footer.company': 'Company',
-      'footer.rights': '© 2026 XUNSHE. All rights reserved.',
-      'footer.icp': 'ICP XXXXXXXX',
+      'footer.rights': '© 2026 XUNSHE. All rights reserved. 河南郑州讯蛇科技有限公司',
+      'footer.icp': '豫ICP备2026038032号',
     },
     'zh-TC': {
       'nav.home': '首頁',
@@ -170,8 +170,8 @@ const I18N = {
       'footer.products': '產品',
       'footer.support': '支援',
       'footer.company': '公司',
-      'footer.rights': '© 2026 XUNSHE. All rights reserved.',
-      'footer.icp': '浙ICP備XXXXXXXX號',
+      'footer.rights': '© 2026 XUNSHE. All rights reserved. 河南郑州讯蛇科技有限公司',
+      'footer.icp': '豫ICP備2026038032號',
     }
   },
 

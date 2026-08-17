@@ -442,7 +442,7 @@
     // ── 管理后台逻辑 ──
     const API_BASE = '/api';
     let currentCollection = 'products';
-    let authToken = sessionStorage.getItem('xunshe-admin-token') || '';
+    let authToken = sessionStorage.getItem('xunshe-auth') || '';
 
     // ── 集合配置（新的 5 种数据类型） ──
     const COLLECTIONS = {
@@ -548,13 +548,13 @@
         });
         if (res.status === 401 || res.status === 403) {
           authToken = '';
-          sessionStorage.removeItem('xunshe-admin-token');
+          sessionStorage.removeItem('xunshe-auth');
           errEl.textContent = '认证失败，请检查用户名和密码';
           return;
         }
         if (!res.ok) throw new Error('验证失败');
 
-        sessionStorage.setItem('xunshe-admin-token', authToken);
+        sessionStorage.setItem('xunshe-auth', authToken);
         document.getElementById('loginOverlay').classList.add('hidden');
         document.getElementById('adminLayout').classList.remove('hidden');
         loadCollection('products');
@@ -578,7 +578,7 @@
       document.getElementById('logoutLink').addEventListener('click', e => {
         e.preventDefault();
         authToken = '';
-        sessionStorage.removeItem('xunshe-admin-token');
+        sessionStorage.removeItem('xunshe-auth');
         document.getElementById('loginOverlay').classList.remove('hidden');
         document.getElementById('adminLayout').classList.add('hidden');
         document.getElementById('loginUser').value = '';
@@ -704,11 +704,13 @@
       let data = {};
       if (id) {
         try {
-          const res = await fetch(`${API_BASE}/content/${currentCollection}/all`, {
+          const res = await fetch(`${API_BASE}/content/${currentCollection}/${id}`, {
             headers: { 'Authorization': 'Basic ' + authToken }
           });
-          const json = await res.json();
-          data = (json.data?.items || []).find(item => item._id === id) || {};
+          if (res.ok) {
+            const json = await res.json();
+            data = json.data || {};
+          }
         } catch (e) { /* ignore */ }
       }
 
@@ -1116,7 +1118,7 @@
 
     function handleAuthExpired() {
       authToken = '';
-      sessionStorage.removeItem('xunshe-admin-token');
+      sessionStorage.removeItem('xunshe-auth');
       document.getElementById('loginOverlay').classList.remove('hidden');
       document.getElementById('adminLayout').classList.add('hidden');
       document.getElementById('loginError').textContent = '登录已过期，请重新登录';
@@ -1135,7 +1137,7 @@
         const datalist = document.getElementById('productIdList');
         if (datalist) {
           datalist.innerHTML = productCatalog.map(p =>
-            `<option value="${p.productId}">${p.name} (${p.category})</option>`
+            `<option value="${escapeHtml(p.productId)}">${escapeHtml(p.name)} (${escapeHtml(p.category)})</option>`
           ).join('');
         }
       } catch (e) { /* ignore */ }

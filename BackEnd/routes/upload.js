@@ -2,9 +2,20 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const crypto = require('crypto');
 const { adminAuth } = require('../middleware/auth');
 
 const MAX_SIZE = parseInt(process.env.UPLOAD_MAX_SIZE) || 209715200; // 200MB
+
+/**
+ * 生成唯一文件名 — 使用 crypto.randomUUID() 彻底避免碰撞
+ * 格式: {timestamp}-{uuid8}{ext}
+ */
+function uniqueFilename(originalname) {
+  const uuid = crypto.randomUUID().replace(/-/g, '').substring(0, 12);
+  const ext = path.extname(originalname);
+  return `${Date.now()}-${uuid}${ext}`;
+}
 
 // 图片上传配置
 const imageStorage = multer.diskStorage({
@@ -12,9 +23,7 @@ const imageStorage = multer.diskStorage({
     cb(null, path.join(__dirname, '..', 'uploads', 'images'));
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, uniqueSuffix + ext);
+    cb(null, uniqueFilename(file.originalname));
   }
 });
 
@@ -38,9 +47,7 @@ const driverStorage = multer.diskStorage({
     cb(null, path.join(__dirname, '..', 'uploads', 'drivers'));
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, uniqueSuffix + ext);
+    cb(null, uniqueFilename(file.originalname));
   }
 });
 
@@ -78,7 +85,7 @@ router.post('/', adminAuth, (req, res) => {
   });
 });
 
-// POST /api/upload-driver — 上传驱动文件（需认证）
+// POST /api/upload/driver — 上传驱动文件（需认证）
 router.post('/driver', adminAuth, (req, res) => {
   driverUpload.single('file')(req, res, (err) => {
     if (err) {
