@@ -16,19 +16,23 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', 1);
 
 // ── CORS 配置 ──
+// 配置了 CORS_ORIGINS 则严格按白名单校验；未配置时反射请求 Origin（同源部署友好），
+// 避免「默认 localhost 白名单 + 生产环境同源写请求」被误拒，导致管理后台 POST/PUT/DELETE 报 500。
 const allowedOrigins = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',').map(s => s.trim())
-  : ['http://localhost:3000', 'http://localhost:5500']; // 开发默认值
+  : null;
 
 app.use(cors({
-  origin: (origin, callback) => {
-    // 允许无 origin 的请求（同源请求、Postman 等工具）
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
-      return callback(null, true);
-    }
-    callback(new Error(`Origin ${origin} not allowed by CORS`));
-  },
+  origin: allowedOrigins
+    ? (origin, callback) => {
+        // 允许无 origin 的请求（同源 GET、Postman 等工具）
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+          return callback(null, true);
+        }
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    : true, // 未配置白名单：反射 Origin，兼容同源写请求
   credentials: true,
   maxAge: 86400 // 预检请求缓存 24 小时
 }));
@@ -48,11 +52,14 @@ const globalLimiter = rateLimit({
 app.use('/api', globalLimiter);
 
 // ── 管理员 API 专用限速：15 分钟内每个 IP 最多 30 次（防暴力破解）──
+// 只对写操作（POST/PUT/DELETE）限速；GET 读接口（含公开的产品/轮播/展示位）不参与，
+// 否则首页/产品页的正常浏览会被 30 次/15min 的阈值 429 误伤。
 const adminLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 30,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === 'GET',
   message: { code: 429, message: '管理员请求过于频繁，请 15 分钟后再试' }
 });
 app.use('/api/content', adminLimiter);

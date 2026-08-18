@@ -481,18 +481,21 @@
       main.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px;"><div class="loading-spinner" style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.1);border-top-color:var(--red-primary);border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;"></div></div>';
 
       try {
-        // 同时获取产品目录和产品白底图数据
-        const [prodRes, imgRes] = await Promise.all([
-          API.get('/content/products', { productId, limit: 1 }),
-          API.get('/content/product-images', { productId, limit: 1 })
-        ]);
-
+        // ① 先取产品目录（必需），失败才报错
+        const prodRes = await API.get('/content/products', { productId, limit: 1 });
         productData = prodRes.data?.items?.[0];
-        const imageData = imgRes.data?.items?.[0];
-
         if (!productData) {
           showError('产品未找到');
           return;
+        }
+
+        // ② 白底图是可选增强，失败时降级为占位图，不影响详情展示
+        let imageData = null;
+        try {
+          const imgRes = await API.get('/content/product-images', { productId, limit: 1 });
+          imageData = imgRes.data?.items?.[0];
+        } catch (imgErr) {
+          console.warn('加载产品白底图失败（降级为占位图）:', imgErr);
         }
 
         renderDetail(imageData);

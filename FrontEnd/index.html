@@ -696,27 +696,29 @@
       initCarouselControls();
       initScrollButtons();
 
-      // ① 并行发起所有 API 请求，产品目录只请求一次
-      const [prodRes, carouselRes, showcaseRes] = await Promise.all([
+      // ① 并行发起所有 API 请求，产品目录只请求一次。
+      //    用 allSettled 让任一接口失败只影响对应区块，不拖垮整页。
+      const [prodRes, carouselRes, showcaseRes] = await Promise.allSettled([
         API.get('/content/products', { limit: 200 }),
         API.get('/content/home-carousel', { sort: 'sortOrder', limit: 6 }),
         API.get('/content/home-showcase', { limit: 200, sort: 'sortOrder' })
       ]);
 
-      // ② 构建全局产品映射
-      (prodRes.data?.items || []).forEach(p => { productMap[p.productId] = p; });
+      // ② 构建全局产品映射（失败时降级为空映射）
+      (prodRes.status === 'fulfilled' ? prodRes.value.data?.items || [] : [])
+        .forEach(p => { productMap[p.productId] = p; });
 
       // ③ 渲染轮播
-      carouselData = carouselRes.data?.items || [];
-      carouselData = carouselData.map(item => ({
-        ...item,
-        productName: productMap[item.productId]?.name || item.productId || ''
-      }));
+      carouselData = (carouselRes.status === 'fulfilled' ? carouselRes.value.data?.items || [] : [])
+        .map(item => ({
+          ...item,
+          productName: productMap[item.productId]?.name || item.productId || ''
+        }));
       renderCarousel();
       startAutoSlide();
 
       // ④ 渲染展示区
-      const showcases = showcaseRes.data?.items || [];
+      const showcases = showcaseRes.status === 'fulfilled' ? showcaseRes.value.data?.items || [] : [];
       renderShowcase('keyboard', showcases);
       renderShowcase('mouse', showcases);
       renderShowcase('headphone', showcases);

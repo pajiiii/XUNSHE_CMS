@@ -295,11 +295,11 @@
   <script src="js/i18n.js"></script>
   <script src="js/common.js"></script>
   <script>
-    // ── 产品列表页逻辑（性能优化版） ──
+    // ── 产品列表页逻辑 ──
     let currentCategory = 'keyboard';
     let currentPage = 1;
-    let totalPages = 1;
-    let productMap = {}; // 全局缓存
+    let productMap = {}; // 全局产品目录缓存
+    let allImages = [];  // 全部产品白底图（一次取全量，客户端分页）
     const PAGE_SIZE = 12;
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -310,10 +310,21 @@
         updateFilterButtons();
       }
 
-      // 先加载产品目录，再加载首屏数据（loadProducts 依赖 productMap 做分类筛选）
-      const prodRes = await API.get('/content/products', { limit: 200 });
-      (prodRes.data?.items || []).forEach(p => { productMap[p.productId] = p; });
-      await loadProducts();
+      try {
+        // 产品量小：一次取全量产品目录 + 全部白底图，分类筛选与分页都在客户端完成，
+        // 避免「服务端分页 + 客户端分类过滤」错配导致某些分类永远加载不出。
+        const prodRes = await API.get('/content/products', { limit: 200 });
+        (prodRes.data?.items || []).forEach(p => { productMap[p.productId] = p; });
+
+        const imgRes = await API.get('/content/product-images', { limit: 200, sort: 'sortOrder' });
+        allImages = imgRes.data?.items || [];
+      } catch (e) {
+        console.error('加载产品失败:', e);
+        renderError();
+        return;
+      }
+
+      renderPage();
 
       // 筛选按钮事件
       document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -321,13 +332,13 @@
           currentCategory = btn.dataset.filter;
           currentPage = 1;
           updateFilterButtons();
-          loadProducts();
+          renderPage();
         });
       });
 
       document.getElementById('loadMoreBtn').addEventListener('click', () => {
         currentPage++;
-        loadProducts(true);
+        renderPage(true);
       });
     });
 
@@ -337,40 +348,34 @@
       });
     }
 
-    async function loadProducts(append = false) {
+    // 当前分类下的全部产品白底图（数据已在服务端取全量，这里只做分类筛选）
+    function getFilteredImages() {
+      return allImages.filter(item => {
+        const prod = productMap[item.productId];
+        return prod && prod.category === currentCategory;
+      });
+    }
+
+    function renderPage(append = false) {
       const grid = document.getElementById('productsGrid');
       const loadMoreWrap = document.getElementById('loadMoreWrap');
 
-      if (!append) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;"><div class="loading-spinner"></div></div>';
+      const filtered = getFilteredImages();
+      const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+      const items = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+      if (!append && items.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><div class="empty-icon"><img src="/ICON/暂无数据.svg" class="icon-svg icon-svg-xl" alt=""></div><p data-i18n="products.empty">暂无产品</p></div>`;
         loadMoreWrap.classList.add('hidden');
+        I18N.updatePage();
+        return;
       }
 
-      try {
-        const res = await API.get('/content/product-images', { page: currentPage, limit: PAGE_SIZE, sort: 'sortOrder' });
-        let items = res.data?.items || [];
-        const total = res.data?.total || 0;
-        totalPages = Math.ceil(total / PAGE_SIZE);
-
-        // 按分类筛选
-        if (currentCategory !== 'all') {
-          items = items.filter(item => {
-            const prod = productMap[item.productId];
-            return prod && prod.category === currentCategory;
-          });
-        }
-
-        if (!append && items.length === 0) {
-          grid.innerHTML = `<div class="empty-state"><div class="empty-icon"><img src="/ICON/暂无数据.svg" class="icon-svg icon-svg-xl" alt=""></div><p data-i18n="products.empty">暂无产品</p></div>`;
-          I18N.updatePage();
-          return;
-        }
-
-        const html = items.map(item => {
-          const prod = productMap[item.productId] || {};
-          const img = item.image || '';
-          const catIcon = prod.category === 'keyboard' ? '键盘' : (prod.category === 'mouse' ? '鼠标' : '耳机');
-          return `
+      const html = items.map(item => {
+        const prod = productMap[item.productId] || {};
+        const img = item.image || '';
+        const catIcon = prod.category === 'keyboard' ? '键盘' : (prod.category === 'mouse' ? '鼠标' : '耳机');
+        return `
           <a href="detail.html?id=${item.productId}" class="product-card">
             <div class="card-img">
               ${img ? `<img src="${img}" alt="${prod.name || item.productId}" loading="lazy" decoding="async">` : `<span class="card-placeholder"><img src="/ICON/${catIcon}.svg" class="icon-svg icon-svg-xl" alt="" style="opacity:0.12;"></span>`}
@@ -380,23 +385,22 @@
               <div class="card-subtitle">${prod.category === 'keyboard' ? '电竞键盘' : (prod.category === 'mouse' ? '电竞鼠标' : '电竞耳机')}</div>
             </div>
           </a>
-        `}).join('');
+      `}).join('');
 
-        if (append) {
-          grid.insertAdjacentHTML('beforeend', html);
-        } else {
-          grid.innerHTML = html;
-        }
-
-        loadMoreWrap.classList.toggle('hidden', currentPage >= totalPages);
-        if (window.I18N) I18N.updatePage();
-      } catch (e) {
-        console.error('加载产品失败:', e);
-        if (!append) {
-          grid.innerHTML = `<div class="empty-state"><div class="empty-icon"><img src="/ICON/暂无数据.svg" class="icon-svg icon-svg-xl" alt=""></div><p data-i18n="common.error">加载失败，请稍后重试</p></div>`;
-          I18N.updatePage();
-        }
+      if (append) {
+        grid.insertAdjacentHTML('beforeend', html);
+      } else {
+        grid.innerHTML = html;
       }
+
+      loadMoreWrap.classList.toggle('hidden', currentPage >= totalPages);
+      if (window.I18N) I18N.updatePage();
+    }
+
+    function renderError() {
+      const grid = document.getElementById('productsGrid');
+      grid.innerHTML = `<div class="empty-state"><div class="empty-icon"><img src="/ICON/暂无数据.svg" class="icon-svg icon-svg-xl" alt=""></div><p data-i18n="common.error">加载失败，请稍后重试</p></div>`;
+      if (window.I18N) I18N.updatePage();
     }
   </script>
 </body>
