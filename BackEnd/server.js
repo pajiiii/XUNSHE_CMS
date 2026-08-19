@@ -63,7 +63,16 @@ const adminLimiter = rateLimit({
   message: { code: 429, message: '管理员请求过于频繁，请 15 分钟后再试' }
 });
 app.use('/api/content', adminLimiter);
-app.use('/api/upload', adminLimiter);
+
+// ── 上传接口限速：5 分钟内每个 IP 最多 100 次（批量上传图片/驱动场景）──
+const uploadLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { code: 429, message: '上传过于频繁，请 5 分钟后再试' }
+});
+app.use('/api/upload', uploadLimiter);
 
 // 静态文件服务 — 前端页面
 app.use(express.static(path.join(__dirname, '..', 'FrontEnd')));
