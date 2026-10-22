@@ -74,8 +74,23 @@ const uploadLimiter = rateLimit({
 });
 app.use('/api/upload', uploadLimiter);
 
+const FRONTEND_DIR = path.join(__dirname, '..', 'FrontEnd');
+
+// ── 驱动支持分流页（干净 URL）──
+app.get(['/drivers', '/drivers/'], (req, res) => {
+  res.redirect(301, '/drivers.html');
+});
+
+app.get(['/drivers/web', '/drivers/web/'], (req, res) => {
+  res.sendFile(path.join(FRONTEND_DIR, 'drivers', 'web.html'));
+});
+
+app.get(['/drivers/download', '/drivers/download/'], (req, res) => {
+  res.sendFile(path.join(FRONTEND_DIR, 'drivers', 'download.html'));
+});
+
 // 静态文件服务 — 前端页面
-app.use(express.static(path.join(__dirname, '..', 'FrontEnd')));
+app.use(express.static(FRONTEND_DIR));
 
 // Logo 静态服务
 app.use('/logo', express.static(path.join(__dirname, '..', 'logo')));
@@ -100,7 +115,7 @@ app.get('*', (req, res) => {
   if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
     return res.status(404).json({ code: 404, message: 'Not Found' });
   }
-  res.sendFile(path.join(__dirname, '..', 'FrontEnd', 'index.html'));
+  res.sendFile(path.join(FRONTEND_DIR, 'index.html'));
 });
 
 // ── 全局错误处理 ──

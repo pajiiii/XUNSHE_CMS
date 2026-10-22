@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// ⑤ 驱动支持 — 用于 drivers.html 驱动下载页面
+// ⑤ 驱动支持 — 驱动安装包 / 网页端链接的资源记录
 const driverSchema = new mongoose.Schema({
   category:    { type: String, required: true, enum: ['keyboard', 'mouse', 'headphone'], index: true },
   name:        { type: String, required: true },                             // 驱动名称

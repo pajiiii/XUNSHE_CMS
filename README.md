@@ -25,7 +25,7 @@ XUNSHE/
 │   │   ├── ProductImage.js    # ② 产品中心白底图
 │   │   ├── HomeCarousel.js    # ③ 首页轮播图
 │   │   ├── HomeShowcase.js    # ④ 主页展示图
-│   │   └── Driver.js          # ⑤ 驱动下载
+│   │   └── Driver.js          # ⑤ 驱动资源（安装包 / 网页端链接）
 │   ├── middleware/
 │   │   └── auth.js            # 认证中间件
 │   └── uploads/               # 上传文件目录
@@ -33,13 +33,17 @@ XUNSHE/
     ├── index.html             # 首页
     ├── products.html          # 产品列表页
     ├── detail.html            # 产品详情页
-    ├── drivers.html           # 驱动下载页
+    ├── drivers.html           # 驱动支持入口页（网页端 / 客户端分流）
+    ├── drivers/
+    │   ├── web.html           # 网页端在线驱动（WebHID 识别）
+    │   └── download.html      # 客户端软件下载（静态页）
     ├── admin.html             # 管理后台
     ├── css/
     │   └── common.css         # 深色电竞主题 + 全局质感层（氛围背景/按钮/卡片/页头/页脚）
     └── js/
         ├── common.js          # 公共交互逻辑
-        ├── device-detect.js   # WebHID 设备自动识别
+        ├── device-map.js      # 设备 VID/PID 映射表（纯数据）
+        ├── driver-web.js      # WebHID 识别与跳转逻辑
         └── i18n.js            # 多语言支持
 ```
 
@@ -78,27 +82,60 @@ npm run dev
 
 访问 `/admin.html`，使用 `.env` 中配置的管理员账号登录。
 
-## 驱动页设备识别
+## 驱动支持
 
-`drivers.html` 的「识别设备」按钮通过 WebHID（`navigator.hid.requestDevice`）读取设备的
-`vendorId` / `productId`，匹配 `FrontEnd/js/device-detect.js` 中的 `DEVICE_PROFILES` 后高亮推荐驱动。
+驱动页拆分为两个入口，`drivers.html` 只负责分流：
 
-匹配以 **PID 为准**：同一设备在有线 / 2.4G 无线下 VID 可能变化，PID 保持不变。
+| 页面 | 路由 | 说明 |
+|------|------|------|
+| 驱动支持入口 | `/drivers.html` | 选择网页端驱动或客户端下载 |
+| 网页端驱动 | `/drivers/web` | 一个「连接设备」按钮 → 浏览器选择器 → 自动跳转 |
+| 客户端软件下载 | `/drivers/download` | 静态下载页，安装包位于 `BackEnd/uploads/drivers/` |
 
-| 型号 | VID | PID | 说明 |
-|------|-----|-----|------|
-| 迅蛇 S1 耳机 | 0x040b（无线可能不同） | 0xf77c | — |
-| 迅蛇 X75 键盘 | 0x0416 | 0x7500 | 与 X68 共用同一网页驱动 |
-| 迅蛇 X68 键盘 | 0x0416 | 0x7500 | 仅型号名不同，驱动同 X75 |
-| 迅蛇 电竞鼠标 | 0xa8a4（有线）/ 0xa8a5（2.4G 无线） | 0x2255 | 页面会标注当前连接方式 |
+### 网页端识别逻辑
 
-- 仅在桌面版 Chrome / Edge 且通过 HTTPS 或 localhost 访问时可用
-- 新增型号：在 `DEVICE_PROFILES` 中追加一条档案（`pids` 必填，可选 `vids` / `vidHints` / `variants` / `driverKeywords`）
-- 同一型号枚举出的多个 HID 接口会自动合并为一行
-- 未收录的设备会折叠到「其他设备」，页面只保留数量，具体 VID / PID 打印在浏览器控制台，便于客服排查
-- 识别失败会自动降级重试：PID 过滤 → VID + PID → 不过滤设备；仍失败时页面会显示错误类型（如 `TypeError`），完整信息打印在浏览器控制台
-- 推荐驱动卡片使用渐变流光 + 呼吸高亮提示，并遵循系统 `prefers-reduced-motion` 设置
-- 若设备未出现在浏览器选择器中（系统级键鼠接口可能被浏览器屏蔽），可在 Windows「设备管理器 → 硬件 ID」查看 VID/PID 后补录
+1. 点击「连接设备」→ `navigator.hid.requestDevice({ filters })`（`filters` 由映射表的 PID 自动生成）
+2. 浏览器弹出设备选择框，用户选中设备后读取 `vendorId` / `productId`，拼成 `'0xVID:0xPID'`
+3. **自动跳转**：
+   - 有网页端驱动 → 直接打开该型号网页驱动
+   - 只有客户端（如 S1 耳机）→ 跳到 `/drivers/download.html#headphone`
+4. 未命中 / 取消 / 权限拒绝时，按钮下方只显示一行状态文案；未识别时附带设备 ID 便于排查
+
+过滤器按三级降级，任何一级抛错都自动换下一级，避免「识别失败」直接卡死：
+
+| 顺序 | filters | 说明 |
+|------|---------|------|
+| 1 | `[{ productId }]` | 最精确，选择器只列迅蛇设备 |
+| 2 | `[{ vendorId, productId }]` | 部分浏览器不接受只有 PID 的过滤器 |
+| 3 | `[]` | 兜底，列出全部 HID 设备 |
+
+> 真正的异常（非用户取消）会显示错误类型与 message，并打印到浏览器控制台，
+> 例如 `NotAllowedError`（权限/用户手势）或 `TypeError`（过滤器不被接受）。
+
+页面底部只有一行支持说明：迅蛇 X75 / X68 键盘、电竞鼠标支持网页端，S1 耳机请下载客户端。
+
+### 设备数据（逻辑与数据分离）
+
+所有设备数据集中在 `FrontEnd/js/device-map.js`，业务逻辑 `FrontEnd/js/driver-web.js` 中不包含任何
+VID/PID 或型号信息：
+
+| 型号 | VID | PID | 网页端 | 客户端 |
+|------|-----|-----|--------|--------|
+| 迅蛇 X75 / X68 键盘 | 0x0416 | 0x7500 | 支持 | 支持 |
+| 迅蛇 电竞鼠标 | 0xa8a4（有线）/ 0xa8a5（2.4G） | 0x2255 | 支持 | 支持 |
+| 迅蛇 S1 耳机 | 0x040b（无线可能不同） | 0xf77c | 不支持 | 支持 |
+
+- `DEVICE_MAP`：`'0xVID:0xPID' → { nameKey, category, keywords, webSupported, webUrl, downloadAnchor }`
+- `EXTRA_FILTERS`：追加到 `requestDevice` 的额外过滤条件（默认按 PID 过滤）
+- 网页端地址优先级：`DEVICE_MAP.webUrl`（写死） → 后台驱动记录的 `webUrl`（按 `category` + `keywords` 匹配）
+- `webSupported: false` 的型号永不跳网页端，统一引导下载客户端
+- 匹配顺序：精确 `VID:PID` → 反向上报 → 仅 PID（有线/无线切换时 VID 会变）
+
+兼容性：仅桌面版 Chrome / Edge，且必须通过 HTTPS 或 localhost 访问（WebHID 安全上下文要求）。
+Safari / Firefox 会禁用按钮并提示更换浏览器。
+
+客户端安装包：上传到 `BackEnd/uploads/drivers/` 后，把 `FrontEnd/drivers/download.html` 中对应
+`href` 替换成上传接口返回的真实地址。
 
 ## 环境变量
 
