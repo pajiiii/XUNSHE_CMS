@@ -38,8 +38,10 @@
     }
 
     .driver-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-card);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.012)),
+        var(--bg-card);
+      border: 1px solid var(--hairline);
       border-radius: var(--radius-md);
       padding: 24px;
       display: flex;
@@ -48,6 +50,7 @@
       transition: all var(--transition-smooth);
       position: relative;
       overflow: hidden;
+      box-shadow: var(--shadow-card);
     }
 
     .driver-card::before {
@@ -64,6 +67,7 @@
     .driver-card:hover {
       border-color: rgba(255,0,21,0.35);
       transform: translateX(4px);
+      box-shadow: var(--shadow-lift);
     }
 
     .driver-card:hover::before { opacity: 1; }
@@ -113,11 +117,39 @@
 
     .driver-download {
       flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
+    /* 下载客户端：低饱和度，引导用户优先使用网页版驱动 */
     .download-btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.08);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .download-btn:hover {
+      background: rgba(255,255,255,0.16);
+      color: var(--text-primary);
+      transform: translateY(-2px);
+    }
+
+    /* 网页驱动：主行动按钮 */
+    .web-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       gap: 8px;
       padding: 12px 24px;
       background: var(--red-primary);
@@ -130,7 +162,7 @@
       box-shadow: 0 4px 16px var(--red-glow);
     }
 
-    .download-btn:hover {
+    .web-btn:hover {
       background: #ff2222;
       color: #fff;
       box-shadow: 0 6px 24px rgba(255,0,21,0.55);
@@ -157,12 +189,399 @@
 
     .empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.4; }
 
+    /* ── 设备自动识别 ── */
+    .detect-section {
+      max-width: 948px;
+      margin: 0 auto 20px;
+      padding: 0 24px;
+    }
+
+    .detect-card {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 22px 28px;
+      padding: 26px 28px 24px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: var(--radius-lg);
+      background:
+        radial-gradient(120% 150% at 0% 0%, rgba(255,0,21,0.16) 0%, transparent 52%),
+        linear-gradient(160deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0) 52%),
+        var(--bg-card);
+      box-shadow: 0 20px 48px rgba(0,0,0,0.45);
+    }
+
+    .detect-card::before {
+      content: '';
+      position: absolute;
+      inset: 0 0 auto;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--red-primary) 45%, transparent);
+      opacity: 0.85;
+    }
+
+    .detect-main {
+      flex: 1 1 380px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .detect-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .detect-badge {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      color: #fff;
+      background: linear-gradient(145deg, #ff3949, #c30b1c);
+      box-shadow: 0 10px 22px rgba(255,0,21,0.32);
+    }
+
+    .detect-copy { min-width: 0; }
+
+    .detect-title {
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+    }
+
+    .detect-sub {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-muted);
+    }
+
+    .detect-models {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detect-models-label {
+      font-size: 0.7rem;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .detect-model-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .detect-model {
+      padding: 4px 11px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      color: var(--text-secondary);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-card);
+      transition: all var(--transition-fast);
+    }
+
+    .detect-model:hover {
+      color: var(--text-primary);
+      border-color: rgba(255,0,21,0.4);
+    }
+
+    .detect-hint {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      font-size: 0.78rem;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    .detect-hint svg {
+      flex-shrink: 0;
+      margin-top: 2px;
+      color: var(--red-primary);
+    }
+
+    .detect-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .detect-btn {
+      min-width: 168px;
+      padding: 13px 26px;
+      border-radius: 10px;
+    }
+
+    .detect-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ── 识别结果 ── */
+    .device-detect-result {
+      flex-basis: 100%;
+      min-width: 0;
+      padding-top: 18px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .device-detect-result[hidden] { display: none; }
+
+    .detect-headline {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .detect-headline::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .is-success .detect-headline::before { background: #2ecc71; box-shadow: 0 0 8px rgba(46,204,113,0.55); }
+    .is-warn .detect-headline::before { background: #f0b429; box-shadow: 0 0 8px rgba(240,180,41,0.5); }
+    .is-error .detect-headline::before { background: var(--red-primary); box-shadow: 0 0 8px var(--red-glow); }
+    .is-info .detect-headline::before { background: var(--text-muted); }
+
+    .detect-devices {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .detect-device {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.035);
+      border: 1px solid var(--border-card);
+    }
+
+    .detect-device-icon {
+      width: 40px;
+      height: 40px;
+      padding: 9px;
+      border-radius: 10px;
+      background: rgba(255,0,21,0.1);
+      flex-shrink: 0;
+    }
+
+    .detect-device-body { flex: 1; min-width: 0; }
+
+    .detect-device-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detect-device-name {
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .detect-chip {
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      color: #fff;
+      background: rgba(255,0,21,0.5);
+      border: 1px solid rgba(255,0,21,0.45);
+    }
+
+    .detect-device-match {
+      margin-top: 7px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .detect-device-match strong { color: var(--text-primary); font-weight: 600; }
+
+    .detect-device-note {
+      margin-top: 4px;
+      font-size: 0.74rem;
+      color: var(--red-primary);
+      opacity: 0.9;
+    }
+
+    .detect-web-btn {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      background: linear-gradient(135deg, #ff3545, #d20a1c);
+      box-shadow: 0 8px 18px rgba(255,0,21,0.28);
+      transition: all var(--transition-fast);
+    }
+
+    .detect-web-btn::after { content: '↗'; font-size: 0.85em; opacity: 0.9; }
+
+    .detect-web-btn:hover {
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(255,0,21,0.4);
+    }
+
+    /* ── 非 XUNSHE 设备（默认折叠） ── */
+    .detect-others { margin-top: 14px; }
+
+    .detect-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .detect-more:hover {
+      color: var(--text-primary);
+      border-color: rgba(255,0,21,0.4);
+    }
+
+    .detect-more svg { transition: transform var(--transition-fast); }
+    .detect-more[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+    .detect-others-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .detect-others-body[hidden] { display: none; }
+
+    .detect-others-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    .detect-other-item {
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.03);
+      border: 1px dashed var(--border-card);
+    }
+
+    .detect-others-note {
+      font-size: 0.74rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .detect-error-detail {
+      margin-top: 8px;
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      word-break: break-word;
+      opacity: 0.75;
+    }
+
+    /* ── 推荐态：渐变流光 + 呼吸闪烁 ── */
+    .driver-card.recommended {
+      border-color: rgba(255,0,21,0.55);
+      background-color: var(--bg-card);
+      background-image: linear-gradient(110deg,
+        rgba(255,0,21,0.16) 0%,
+        rgba(255,0,21,0) 26%,
+        rgba(255,0,21,0.14) 52%,
+        rgba(255,0,21,0) 78%,
+        rgba(255,0,21,0.16) 100%);
+      background-size: 220% 100%;
+      animation: recommendGlow 2.4s ease-in-out infinite, recommendSweep 4.5s linear infinite;
+    }
+
+    .driver-card.recommended::before { opacity: 1; }
+
+    .driver-card.recommended::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, #ff0015, #ff8a3d, #ff0015);
+      background-size: 100% 200%;
+      animation: recommendSweepY 2.4s linear infinite;
+    }
+
+    @keyframes recommendGlow {
+      0%, 100% {
+        border-color: rgba(255,0,21,0.4);
+        box-shadow: 0 0 0 1px rgba(255,0,21,0.14), 0 10px 26px rgba(255,0,21,0.12);
+      }
+      50% {
+        border-color: rgba(255,0,21,0.95);
+        box-shadow: 0 0 0 2px rgba(255,0,21,0.32), 0 14px 40px rgba(255,0,21,0.42);
+      }
+    }
+
+    @keyframes recommendSweep {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    @keyframes recommendSweepY {
+      0% { background-position: 50% 0%; }
+      100% { background-position: 50% 200%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .driver-card.recommended,
+      .driver-card.recommended::after { animation: none !important; }
+    }
+
     /* ── 响应式 ── */
     @media (max-width: 640px) {
       .page-header h1 { font-size: 1.8rem; }
       .driver-card { flex-direction: column; align-items: flex-start; }
       .driver-download { width: 100%; }
-      .download-btn { width: 100%; justify-content: center; }
+      .download-btn,
+      .web-btn { width: 100%; justify-content: center; }
+      .detect-section { padding: 0 16px; }
+      .detect-card { padding: 22px 18px; gap: 18px; }
+      .detect-actions { align-items: stretch; width: 100%; }
+      .detect-btn { width: 100%; justify-content: center; }
+      .detect-device { flex-wrap: wrap; }
+      .detect-web-btn { width: 100%; justify-content: center; }
     }
   </style>
 </head>
@@ -197,6 +616,51 @@
     <section class="page-header" data-animate>
       <h1><span class="red"><img src="/ICON/驱动支持.svg" class="icon-svg icon-svg-lg icon-red" alt=""></span> <span data-i18n="drivers.title">驱动下载</span></h1>
       <p class="section-subtitle" data-i18n="drivers.subtitle">下载最新驱动，释放设备全部潜能</p>
+    </section>
+
+    <!-- ═══ 设备自动识别 ═══ -->
+    <section class="detect-section" data-animate>
+      <div class="detect-card">
+        <div class="detect-main">
+          <div class="detect-head">
+            <div class="detect-badge" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="4" width="16" height="16" rx="3"></rect>
+                <rect x="8.5" y="8.5" width="7" height="7" rx="1.5"></rect>
+                <path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"></path>
+              </svg>
+            </div>
+            <div class="detect-copy">
+              <h2 class="detect-title" data-i18n="drivers.detect.title">自动识别设备</h2>
+              <p class="detect-sub" data-i18n="drivers.detect.desc">将设备连接到电脑后点击识别，自动匹配型号与对应驱动（支持有线 / 2.4G 无线）</p>
+            </div>
+          </div>
+          <div class="detect-models">
+            <span class="detect-models-label" data-i18n="drivers.detect.supported">已支持设备</span>
+            <div class="detect-model-list" id="detectModelList"></div>
+          </div>
+          <div class="detect-hint">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9"></circle>
+              <path d="M12 9h.01M11 12h1v4h1"></path>
+            </svg>
+            <span data-i18n="drivers.detect.webDriverTip">小提示：推荐使用网页版驱动跳转，免安装更省心</span>
+          </div>
+        </div>
+        <div class="detect-actions">
+          <button type="button" id="detectDeviceBtn" class="btn btn-primary detect-btn">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 21V7"></path>
+              <path d="m8 11 4-4 4 4"></path>
+              <circle cx="12" cy="4" r="1.6"></circle>
+              <path d="M12 15a4 4 0 0 0 4-4"></path>
+              <rect x="15.5" y="8.5" width="3.5" height="3.5" rx="1"></rect>
+            </svg>
+            <span data-i18n="drivers.detect.button">识别设备</span>
+          </button>
+        </div>
+        <div id="deviceDetectResult" class="device-detect-result" role="status" aria-live="polite" hidden></div>
+      </div>
     </section>
 
     <!-- ═══ 驱动列表 ═══ -->
@@ -237,6 +701,7 @@
 
   <script src="js/i18n.js"></script>
   <script src="js/common.js"></script>
+  <script src="js/device-detect.js"></script>
   <script>
     // ── 驱动页逻辑 ──
     document.addEventListener('DOMContentLoaded', () => {
@@ -256,7 +721,7 @@
         }
 
         list.innerHTML = items.map(item => `
-          <div class="driver-card">
+          <div class="driver-card" data-driver-id="${item._id || ''}" data-category="${item.category || ''}">
             <div class="driver-icon"><img src="/ICON/${item.category === 'mouse' ? '鼠标' : (item.category === 'headphone' ? '耳机' : '键盘')}.svg" class="icon-svg icon-svg-lg" alt="" style="opacity:0.7;"></div>
             <div class="driver-info">
               <div class="driver-name">${item.name || ''}</div>
@@ -266,16 +731,18 @@
               ${item.description ? `<div class="driver-desc">${item.description}</div>` : ''}
             </div>
             <div class="driver-download">
+              ${item.webUrl ? `<a href="${item.webUrl}" class="web-btn" target="_blank" rel="noopener"><span data-i18n="drivers.detect.openWebDriver">网页驱动</span></a>` : ''}
               ${item.fileUrl ? `<a href="${item.fileUrl}" class="download-btn"><span data-i18n="drivers.download">下载客户端</span></a>` : ''}
-              ${item.webUrl ? `<a href="${item.webUrl}" class="download-btn" style="background:var(--bg-card);border:1px solid var(--border-card);${item.fileUrl ? 'margin-top:8px;' : ''}box-shadow:none;" target="_blank">网页驱动</a>` : ''}
             </div>
           </div>
         `).join('');
 
+        if (window.DeviceDetect) DeviceDetect.setDrivers(items);
         I18N.updatePage();
       } catch (e) {
         console.error('加载驱动列表失败:', e);
         list.innerHTML = `<div class="empty-state"><div class="empty-icon"><img src="/ICON/暂无数据.svg" class="icon-svg icon-svg-xl" alt=""></div><p data-i18n="common.error">加载失败，请稍后重试</p></div>`;
+        if (window.DeviceDetect) DeviceDetect.setDrivers([]);
         I18N.updatePage();
       }
     }

@@ -39,7 +39,7 @@
       border-radius: 30px;
       font-weight: 600;
       font-size: 0.9rem;
-      background: var(--bg-card);
+      background: rgba(255, 255, 255, 0.035);
       color: var(--text-secondary);
       border: 1px solid var(--border-card);
       transition: all var(--transition-fast);
@@ -47,15 +47,17 @@
     }
 
     .filter-btn:hover {
-      border-color: var(--red-primary);
+      border-color: rgba(252, 36, 54, 0.45);
       color: var(--text-primary);
+      background: rgba(252, 36, 54, 0.08);
+      transform: translateY(-1px);
     }
 
     .filter-btn.active {
-      background: var(--red-primary);
+      background: var(--gradient-red);
       color: #fff;
-      border-color: var(--red-primary);
-      box-shadow: 0 4px 16px var(--red-glow);
+      border-color: transparent;
+      box-shadow: 0 8px 22px rgba(252, 36, 54, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.22);
     }
 
     /* ── 产品网格 ── */
@@ -101,6 +103,27 @@
 
     .product-card:hover::before { opacity: 1; }
 
+    .product-card {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012)),
+        var(--bg-card);
+      border-color: var(--hairline);
+      box-shadow: var(--shadow-card);
+    }
+
+    .product-card:hover {
+      border-color: rgba(252, 36, 54, 0.36);
+      box-shadow: var(--shadow-lift);
+    }
+
+    .product-card .card-img::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, transparent 58%, rgba(10, 10, 12, 0.5) 100%);
+    }
+
     .product-card .card-img {
       aspect-ratio: 1 / 1;
       background: var(--bg-surface);
@@ -138,8 +161,9 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: var(--red-primary);
-      background: rgba(255,0,21,0.1);
+      color: #ffd9dd;
+      background: linear-gradient(135deg, rgba(252, 36, 54, 0.26), rgba(252, 36, 54, 0.1));
+      border: 1px solid rgba(252, 36, 54, 0.26);
       border-radius: 3px;
       margin-bottom: 10px;
     }

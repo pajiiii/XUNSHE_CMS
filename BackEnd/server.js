@@ -112,9 +112,12 @@ app.use((err, req, res, next) => {
 // ── 连接数据库并启动 ──
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/xunshe';
 
+// 注意：当前 mongoose 7 / mongodb 驱动 5.x 不认识 autoSelectFamily（会直接抛
+// MongoParseError: option autoselectfamily is not supported），
+// 这里改用驱动支持的 family: 4，绕开 Node 18+ 默认开启的 IPv4/IPv6 自动选择导致的 Atlas 连接超时。
 mongoose.connect(MONGODB_URI, {
-  serverSelectionTimeoutMS: 5000, // 初始连接超时 5 秒
-  heartbeatFrequencyMS: 10000     // 每 10 秒发送心跳
+  serverSelectionTimeoutMS: 10000, // 初始连接超时 10 秒（跨境访问 Atlas 留足 TLS 握手时间）
+  heartbeatFrequencyMS: 10000,     // 每 10 秒发送心跳
 })
   .then(() => {
     console.log('✅ MongoDB Atlas 连接成功');
