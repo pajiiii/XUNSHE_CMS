@@ -36,14 +36,16 @@ XUNSHE/
     ├── drivers.html           # 驱动支持入口页（网页端 / 客户端分流）
     ├── drivers/
     │   ├── web.html           # 网页端在线驱动（WebHID 识别）
-    │   └── download.html      # 客户端软件下载（静态页）
+    │   └── download.html      # 客户端下载（数据库驱动列表）
     ├── admin.html             # 管理后台
     ├── css/
-    │   └── common.css         # 深色电竞主题 + 全局质感层（氛围背景/按钮/卡片/页头/页脚）
+    │   ├── common.css         # 公共深色主题
+    │   └── drivers.css        # 驱动页共用简洁布局与移动端适配
     └── js/
         ├── common.js          # 公共交互逻辑
         ├── device-map.js      # 设备 VID/PID 映射表（纯数据）
         ├── driver-web.js      # WebHID 识别与跳转逻辑
+        ├── drivers-download.js # 客户端下载页（读取数据库驱动列表）
         └── i18n.js            # 多语言支持
 ```
 
@@ -90,7 +92,7 @@ npm run dev
 |------|------|------|
 | 驱动支持入口 | `/drivers.html` | 选择网页端驱动或客户端下载 |
 | 网页端驱动 | `/drivers/web` | 一个「连接设备」按钮 → 浏览器选择器 → 自动跳转 |
-| 客户端软件下载 | `/drivers/download` | 静态下载页，安装包位于 `BackEnd/uploads/drivers/` |
+| 客户端软件下载 | `/drivers/download` | 读取 `drivers` 集合渲染，安装包位于 `BackEnd/uploads/drivers/` |
 
 ### 网页端识别逻辑
 
@@ -98,8 +100,8 @@ npm run dev
 2. 浏览器弹出设备选择框，用户选中设备后读取 `vendorId` / `productId`，拼成 `'0xVID:0xPID'`
 3. **自动跳转**：
    - 有网页端驱动 → 直接打开该型号网页驱动
-   - 只有客户端（如 S1 耳机）→ 跳到 `/drivers/download.html#headphone`
-4. 未命中 / 取消 / 权限拒绝时，按钮下方只显示一行状态文案；未识别时附带设备 ID 便于排查
+   - 只有客户端（如 S1 耳机）→ 跳到 `/drivers/download#headphone`
+4. 未命中 / 取消 / 权限拒绝时，按钮下方只显示一行操作提示；设备 ID 与异常详情仅记录到控制台
 
 过滤器按三级降级，任何一级抛错都自动换下一级，避免「识别失败」直接卡死：
 
@@ -109,10 +111,10 @@ npm run dev
 | 2 | `[{ vendorId, productId }]` | 部分浏览器不接受只有 PID 的过滤器 |
 | 3 | `[]` | 兜底，列出全部 HID 设备 |
 
-> 真正的异常（非用户取消）会显示错误类型与 message，并打印到浏览器控制台，
+> 真正的异常（非用户取消）会在浏览器控制台记录错误类型与 message，
 > 例如 `NotAllowedError`（权限/用户手势）或 `TypeError`（过滤器不被接受）。
 
-页面底部只有一行支持说明：迅蛇 X75 / X68 键盘、电竞鼠标支持网页端，S1 耳机请下载客户端。
+页面提供一个连接按钮和客户端下载入口，不展示型号清单或技术参数。
 
 ### 设备数据（逻辑与数据分离）
 
@@ -132,10 +134,20 @@ VID/PID 或型号信息：
 - 匹配顺序：精确 `VID:PID` → 反向上报 → 仅 PID（有线/无线切换时 VID 会变）
 
 兼容性：仅桌面版 Chrome / Edge，且必须通过 HTTPS 或 localhost 访问（WebHID 安全上下文要求）。
-Safari / Firefox 会禁用按钮并提示更换浏览器。
+不支持 `navigator.hid` 的浏览器会隐藏连接按钮，并提示更换浏览器或下载客户端。
 
-客户端安装包：上传到 `BackEnd/uploads/drivers/` 后，把 `FrontEnd/drivers/download.html` 中对应
-`href` 替换成上传接口返回的真实地址。
+客户端下载页的数据来自数据库 `drivers` 集合（管理后台 ⑤ 驱动管理），逻辑见
+`FrontEnd/js/drivers-download.js`：
+
+- 只读取 `isActive = true` 的记录，按 `category`（keyboard / mouse / headphone）分组
+- 下载列表只展示设备名称和操作，不展示文件名、格式、版本或更新时间
+- 有 `fileUrl` 的记录显示「下载安装包」按钮，并 HEAD 校验文件是否真实存在；
+  文件缺失时按钮不可点击，并提示联系客服获取客户端
+- 只有 `webUrl` 的记录显示「打开网页端」按钮
+- 因此新增/删除驱动只需在管理后台操作，无需改前端代码
+
+安装包上传后保存在 `BackEnd/uploads/drivers/`（该目录被 `.gitignore` 忽略，**不会随 Git 部署**，
+需要单独同步到服务器，否则页面上会提示文件缺失）。
 
 ## 环境变量
 

@@ -10,7 +10,7 @@
 (function () {
   'use strict';
 
-  const DOWNLOAD_PAGE = '/drivers/download.html';
+  const DOWNLOAD_PAGE = '/drivers/download';
   const WEB_REDIRECT_DELAY = 700;
   const CLIENT_REDIRECT_DELAY = 900;
 
@@ -23,7 +23,9 @@
     lookup: new Map(),
     drivers: [],
     busy: false,
-    timer: null
+    timer: null,
+    driversReady: null,
+    status: null
   };
 
   let connectBtn = null;
@@ -228,23 +230,21 @@
   }
 
   function clearStatus() {
+    state.status = null;
     if (!statusEl) return;
     statusEl.hidden = true;
     statusEl.className = 'connect-status';
     statusEl.textContent = '';
   }
 
-  function setStatus(message, tone, detail) {
+  function setStatus(key, tone, name) {
+    state.status = { key, tone, name };
     if (!statusEl) return;
     statusEl.hidden = false;
     statusEl.className = `connect-status${tone ? ' is-' + tone : ''}`;
-    statusEl.textContent = message;
-    if (detail) {
-      const line = document.createElement('span');
-      line.className = 'connect-detail';
-      line.textContent = detail;
-      statusEl.appendChild(line);
-    }
+    statusEl.textContent = name
+      ? `${t(key + 'Prefix')}${name}${t(key + 'Suffix')}`
+      : t(key);
   }
 
   function navigate(url, delay) {
@@ -261,16 +261,16 @@
     clearStatus();
 
     if (!hasHID) {
-      setStatus(t('drivers.web.state.unsupported'), 'warn');
+      setStatus('drivers.web.state.unsupported', 'warn');
       return;
     }
     if (!isSecure) {
-      setStatus(t('drivers.web.state.insecure'), 'warn');
+      setStatus('drivers.web.state.insecure', 'warn');
       return;
     }
 
     setBusy(true);
-    setStatus(t('drivers.web.state.reading'));
+    setStatus('drivers.web.state.reading');
 
     let devices = null;
     try {
@@ -279,26 +279,24 @@
       setBusy(false);
 
       if (isCancelError(err)) {
-        setStatus(t('drivers.web.state.cancelled'));
+        setStatus('drivers.web.state.cancelled');
       } else if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
-        setStatus(t('drivers.web.state.denied'), 'warn');
+        setStatus('drivers.web.state.denied', 'warn');
       } else {
         console.error('[XUNSHE] 连接设备失败：', err);
-        setStatus(
-          t('drivers.web.state.error'),
-          'error',
-          `${(err && err.name) || 'Error'}${err && err.message ? '：' + err.message : ''}`
-        );
+        setStatus('drivers.web.state.error', 'error');
       }
       return;
     }
 
-    setBusy(false);
-
     if (!Array.isArray(devices) || devices.length === 0) {
-      setStatus(t('drivers.web.state.cancelled'));
+      setBusy(false);
+      setStatus('drivers.web.state.cancelled');
       return;
     }
+
+    // 保持设备选择器直接由点击触发，选择完成后再等待链接数据。
+    await state.driversReady;
 
     // 同一设备可能上报多个 HID 接口，逐个尝试直到命中
     const seen = new Set();
@@ -313,25 +311,26 @@
       if (result.kind === 'unknown') continue;
 
       if (result.kind === 'web') {
-        setStatus(`${t('drivers.web.state.openingPrefix')}${result.name}${t('drivers.web.state.openingSuffix')}`, 'ok');
+        setStatus('drivers.web.state.opening', 'ok', result.name);
         navigate(result.url, WEB_REDIRECT_DELAY);
       } else {
-        setStatus(`${t('drivers.web.state.clientPrefix')}${result.name}${t('drivers.web.state.clientSuffix')}`, 'warn');
+        setStatus('drivers.web.state.client', null, result.name);
         navigate(result.url, CLIENT_REDIRECT_DELAY);
       }
       return;
     }
 
     console.info('[XUNSHE] 未收录的设备：', ids.join(', '));
-    setStatus(t('drivers.web.state.unknown'), 'warn', ids.join(' · '));
+    setBusy(false);
+    setStatus('drivers.web.state.unknown', 'warn');
   }
 
   /* ── 初始化 ── */
 
   async function loadDrivers() {
-    if (!window.API || typeof window.API.get !== 'function') return;
+    if (typeof API === 'undefined' || typeof API.get !== 'function') return;
     try {
-      const res = await window.API.get('/content/drivers', { sort: 'sortOrder', limit: 100 });
+      const res = await API.get('/content/drivers', { sort: 'sortOrder', limit: 100 });
       state.drivers = res && res.data && Array.isArray(res.data.items) ? res.data.items : [];
     } catch (err) {
       console.warn('[XUNSHE] 驱动记录加载失败，将仅使用映射表中的网页端地址：', err);
@@ -347,24 +346,24 @@
 
     if (connectBtn) connectBtn.addEventListener('click', handleConnect);
 
-    // 语言切换后重绘静态标签（连接中/按钮文案）
-    document.querySelectorAll('.lang-switch button').forEach(btn => {
-      btn.addEventListener('click', () => setTimeout(() => {
-        if (state.busy && connectBtn) {
-          const label = connectBtn.querySelector('[data-connect-label]');
-          if (label) label.textContent = t('drivers.web.connecting');
-        }
-      }, 0));
+    window.addEventListener('languagechange', () => {
+      setBusy(state.busy);
+      if (state.status) {
+        const { key, tone, name } = state.status;
+        setStatus(key, tone, name);
+      }
     });
 
-    loadDrivers();
+    state.driversReady = loadDrivers();
 
     if (!hasHID) {
-      if (connectBtn) connectBtn.disabled = true;
-      setStatus(t('drivers.web.state.unsupported'), 'warn');
+      if (connectBtn) connectBtn.hidden = true;
+      setStatus('drivers.web.state.unsupported', 'warn');
     } else if (!isSecure) {
-      if (connectBtn) connectBtn.disabled = true;
-      setStatus(t('drivers.web.state.insecure'), 'warn');
+      if (connectBtn) connectBtn.hidden = true;
+      setStatus('drivers.web.state.insecure', 'warn');
+    } else if (connectBtn) {
+      connectBtn.hidden = false;
     }
   }
 
